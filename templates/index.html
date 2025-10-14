@@ -1,0 +1,2391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JugaadPress - Hacker's Notebook</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <style>
+        /* ===== REFINED HACKER THEME COLOR PALETTE ===== */
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --accent-primary: #3fb950;
+            --accent-secondary: #58a6ff;
+            --accent-danger: #f85149;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-dim: #6e7681;
+            --border-color: #30363d;
+            --shadow-glow: rgba(63, 185, 80, 0.15);
+            --shadow-glow-secondary: rgba(88, 166, 255, 0.1);
+            --code-bg: #1c2128;
+            --link-color: #58a6ff;
+        }
+
+        /* ===== CUSTOM SCROLLBAR ===== */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-primary);
+        }
+
+        /* ===== TEXT SELECTION ===== */
+        ::selection {
+            background-color: var(--accent-primary);
+            color: var(--bg-primary);
+        }
+
+        /* ===== BASE LAYOUT ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+        }
+
+        /* ===== SIDEBAR ===== */
+        #sidebar {
+            width: 280px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        #sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        #sidebar-header h1 {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--accent-primary);
+            text-shadow: 0 0 10px var(--shadow-glow);
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #sidebar-header h1::before {
+            content: ">";
+            color: var(--accent-secondary);
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        #sidebar-header .subtitle {
+            font-size: 11px;
+            color: var(--text-dim);
+            font-weight: 400;
+            letter-spacing: 1px;
+        }
+
+        #page-controls {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            gap: 8px;
+        }
+
+        #page-controls button {
+            flex: 1;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 10px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            font-family: 'JetBrains Mono', monospace;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #page-controls button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        #page-controls button:disabled:hover {
+            border-color: var(--border-color);
+            color: var(--text-secondary);
+            box-shadow: none;
+        }
+
+        #page-controls button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: var(--accent-primary);
+            opacity: 0.1;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        #page-controls button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        #page-controls button:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+            box-shadow: 0 0 15px var(--shadow-glow);
+            transform: translateY(-1px);
+        }
+
+        #page-controls button:active {
+            transform: translateY(0);
+        }
+
+        #page-controls button i {
+            font-size: 12px;
+            transition: transform 0.3s ease;
+        }
+
+        #page-controls button:hover i {
+            transform: scale(1.1);
+        }
+
+        #page-list-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        #page-list {
+            list-style: none;
+        }
+
+        #page-list li {
+            padding: 10px 12px;
+            margin-bottom: 4px;
+            border-radius: 6px;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            border-left: 3px solid transparent;
+            font-size: 13px;
+            color: var(--text-secondary);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        #page-list li .page-name {
+            flex: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            transition: all 0.2s ease;
+            min-height: 32px;
+        }
+
+        #page-list li .page-name::before {
+            content: "▸";
+            margin-right: 10px;
+            color: var(--accent-secondary);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-block;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        #page-list li:hover {
+            background: var(--bg-tertiary);
+            border-left-color: var(--accent-secondary);
+            color: var(--text-primary);
+            padding-left: 18px;
+            transform: translateX(2px);
+        }
+
+        #page-list li:hover .page-name::before {
+            color: var(--accent-primary);
+        }
+
+        #page-list li.active {
+            background: var(--bg-tertiary);
+            border-left-color: var(--accent-primary);
+            color: var(--accent-primary);
+            font-weight: 500;
+            box-shadow: 0 0 15px var(--shadow-glow);
+            padding-left: 18px;
+        }
+
+        #page-list li.active .page-name::before {
+            transform: rotate(90deg);
+            color: var(--accent-primary);
+        }
+
+        .delete-page-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            cursor: pointer;
+            padding: 6px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 28px;
+            height: 28px;
+        }
+
+        #page-list li:hover .delete-page-btn {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .delete-page-btn:hover {
+            background: rgba(255, 0, 85, 0.2);
+            color: var(--accent-danger);
+            transform: scale(1.15);
+            box-shadow: 0 0 10px rgba(255, 0, 85, 0.3);
+        }
+
+        .delete-page-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* ===== MAIN EDITOR AREA ===== */
+        #main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* ===== TOOLBAR ===== */
+        #toolbar {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .toolbar-separator {
+            width: 1px;
+            height: 24px;
+            background: var(--border-color);
+        }
+
+        #toolbar button {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 8px 14px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        #toolbar button span {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        #toolbar button:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--accent-secondary);
+            color: var(--accent-secondary);
+            box-shadow: 0 0 10px var(--shadow-glow-secondary);
+        }
+
+        #toolbar button.active {
+            background: var(--bg-tertiary);
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        #toolbar button i {
+            font-size: 13px;
+        }
+
+        /* ===== EDITOR CONTAINER (SPLIT VIEW) ===== */
+        #editor-container {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        #editor-pane {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        #editor {
+            flex: 1;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border: none;
+            outline: none;
+            padding: 30px 40px;
+            font-family: 'Fira Code', monospace;
+            font-size: 15px;
+            line-height: 1.7;
+            resize: none;
+            caret-color: var(--accent-primary);
+            overflow-y: auto;
+            transition: opacity 0.15s ease;
+            letter-spacing: 0.3px;
+        }
+
+        #editor.loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        #editor::placeholder {
+            color: var(--text-dim);
+            opacity: 0.6;
+            font-size: 14px;
+        }
+
+        /* ===== PREVIEW PANE ===== */
+        #preview-pane {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-secondary);
+            min-width: 0;
+        }
+
+        #preview-pane.hidden {
+            display: none;
+        }
+
+        #preview-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 11px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-tertiary);
+        }
+
+        #preview-header .label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #preview-header .label::before {
+            content: "◉";
+            color: var(--accent-secondary);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        #preview-content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 40px 50px;
+            color: var(--text-primary);
+            line-height: 1.7;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* ===== MARKDOWN PREVIEW STYLES ===== */
+        #preview-content {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+            font-size: 16px;
+        }
+
+        #preview-content h1, #preview-content h2, #preview-content h3, #preview-content h4, #preview-content h5, #preview-content h6 {
+            color: var(--text-primary);
+            font-weight: 600;
+            line-height: 1.25;
+            margin-top: 24px;
+            margin-bottom: 16px;
+        }
+
+        #preview-content h1:first-child,
+        #preview-content h2:first-child,
+        #preview-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #preview-content h1 {
+            font-size: 32px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
+            font-weight: 700;
+        }
+
+        #preview-content h2 {
+            font-size: 24px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+
+        #preview-content h3 {
+            font-size: 20px;
+        }
+
+        #preview-content h4 {
+            font-size: 16px;
+        }
+
+        #preview-content h5, #preview-content h6 {
+            font-size: 14px;
+        }
+
+        #preview-content p {
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        #preview-content a {
+            color: var(--link-color);
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        #preview-content a:hover {
+            text-decoration: underline;
+        }
+
+        #preview-content strong {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        #preview-content em {
+            font-style: italic;
+        }
+
+        #preview-content code {
+            background: var(--code-bg);
+            color: var(--accent-secondary);
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 14px;
+            border: 1px solid var(--border-color);
+        }
+
+        #preview-content pre {
+            background: var(--code-bg);
+            padding: 16px 20px;
+            border-radius: 6px;
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            margin: 20px 0;
+            line-height: 1.6;
+        }
+
+        #preview-content pre code {
+            background: none;
+            padding: 0;
+            border: none;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        #preview-content ul, #preview-content ol {
+            padding-left: 32px;
+            margin-bottom: 16px;
+        }
+
+        #preview-content li {
+            margin-bottom: 8px;
+            line-height: 1.7;
+        }
+
+        #preview-content li > p {
+            margin-bottom: 8px;
+        }
+
+        #preview-content blockquote {
+            border-left: 4px solid var(--border-color);
+            padding-left: 20px;
+            padding-right: 20px;
+            padding-top: 8px;
+            padding-bottom: 8px;
+            color: var(--text-secondary);
+            margin: 20px 0;
+            background: var(--bg-tertiary);
+            border-radius: 0 4px 4px 0;
+        }
+
+        #preview-content blockquote p {
+            color: var(--text-secondary);
+        }
+
+        #preview-content hr {
+            height: 1px;
+            background: var(--border-color);
+            border: none;
+            margin: 24px 0;
+        }
+
+        #preview-content table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+            overflow: hidden;
+            border-radius: 6px;
+        }
+
+        #preview-content table th,
+        #preview-content table td {
+            border: 1px solid var(--border-color);
+            padding: 10px 14px;
+            text-align: left;
+        }
+
+        #preview-content table th {
+            background: var(--bg-tertiary);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        #preview-content table tr:nth-child(even) {
+            background: var(--bg-tertiary);
+        }
+
+        #preview-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+
+        /* ===== BOTTOM BAR ===== */
+        #bottom-bar {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #status-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 12px;
+        }
+
+        #status {
+            color: var(--text-dim);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #status::before {
+            content: "●";
+            color: var(--accent-secondary);
+            font-size: 10px;
+        }
+
+        #status.saving::before {
+            color: var(--accent-secondary);
+            animation: pulse 1s infinite;
+        }
+
+        #status.saved::before {
+            color: var(--accent-primary);
+        }
+
+        #status.error::before {
+            color: var(--accent-danger);
+        }
+
+        #shortcuts-hint {
+            font-size: 11px;
+            color: var(--text-dim);
+        }
+
+        #shortcuts-hint kbd {
+            background: var(--bg-tertiary);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        #page-list li {
+            animation: fadeInScale 0.2s ease forwards;
+        }
+
+        #page-list li .page-name.editing {
+            pointer-events: none;
+        }
+
+        /* ===== AUTOCOMPLETE DROPDOWN ===== */
+        #autocomplete-dropdown {
+            position: absolute;
+            background: var(--bg-secondary);
+            border: 1px solid var(--accent-primary);
+            border-radius: 6px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 20px var(--shadow-glow);
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            min-width: 250px;
+        }
+
+        #autocomplete-dropdown.show {
+            display: block;
+        }
+
+        .autocomplete-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            transition: all 0.15s ease;
+            border-left: 3px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .autocomplete-item::before {
+            content: "📄";
+            font-size: 14px;
+        }
+
+        .autocomplete-item:hover,
+        .autocomplete-item.selected {
+            background: var(--bg-tertiary);
+            color: var(--accent-primary);
+            border-left-color: var(--accent-primary);
+        }
+
+        .autocomplete-item:first-child {
+            border-top-left-radius: 6px;
+            border-top-right-radius: 6px;
+        }
+
+        .autocomplete-item:last-child {
+            border-bottom-left-radius: 6px;
+            border-bottom-right-radius: 6px;
+        }
+
+        #page-list li .rename-input {
+            background: var(--bg-primary);
+            border: 1px solid var(--accent-primary);
+            color: var(--text-primary);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            outline: none;
+            box-shadow: 0 0 10px var(--shadow-glow);
+            width: 100%;
+            max-width: 180px;
+        }
+
+        #page-list li .rename-input:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 15px var(--shadow-glow);
+        }
+
+        #send-button {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: var(--bg-primary);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            font-family: 'JetBrains Mono', monospace;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px var(--shadow-glow);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #send-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 25px var(--shadow-glow);
+        }
+
+        #send-button:active {
+            transform: translateY(0);
+        }
+
+        #send-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ===== MODAL (CONFIRMATION DIALOG) ===== */
+        #modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.2s ease;
+        }
+
+        #modal-overlay.show {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        #modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5), 0 0 30px var(--shadow-glow);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        #modal h2 {
+            color: var(--accent-primary);
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        #modal p {
+            color: var(--text-secondary);
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        #modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        #modal-actions button {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            transition: all 0.2s ease;
+        }
+
+        #modal-actions button:hover {
+            border-color: var(--accent-secondary);
+            color: var(--accent-secondary);
+        }
+
+        #modal-actions button.primary {
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+            border-color: var(--accent-primary);
+        }
+
+        #modal-actions button.primary:hover {
+            background: var(--accent-secondary);
+            border-color: var(--accent-secondary);
+            box-shadow: 0 0 15px var(--shadow-glow);
+        }
+
+        /* ===== TOAST NOTIFICATION ===== */
+        #toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--accent-primary);
+            color: var(--text-primary);
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5), 0 0 20px var(--shadow-glow);
+            display: none;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            z-index: 1001;
+            animation: slideInRight 0.3s ease;
+        }
+
+        #toast.show {
+            display: flex;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        #toast.error {
+            border-color: var(--accent-danger);
+        }
+
+        #toast i {
+            font-size: 16px;
+            color: var(--accent-primary);
+        }
+
+        #toast.error i {
+            color: var(--accent-danger);
+        }
+
+        /* ===== INPUT MODAL ===== */
+        #input-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.2s ease;
+        }
+
+        #input-modal-overlay.show {
+            display: flex;
+        }
+
+        #input-modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5), 0 0 30px var(--shadow-glow);
+            animation: slideUp 0.3s ease;
+        }
+
+        #input-modal h2 {
+            color: var(--accent-primary);
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+
+        #input-modal p {
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            line-height: 1.6;
+            font-size: 13px;
+        }
+
+        #input-modal input {
+            width: 100%;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 12px 15px;
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            margin-bottom: 20px;
+            transition: all 0.2s ease;
+        }
+
+        #input-modal input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 15px var(--shadow-glow);
+        }
+
+        #input-modal input::placeholder {
+            color: var(--text-dim);
+            opacity: 0.6;
+        }
+
+        #input-modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        #input-modal-actions button {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            transition: all 0.2s ease;
+        }
+
+        #input-modal-actions button:hover {
+            border-color: var(--accent-secondary);
+            color: var(--accent-secondary);
+        }
+
+        #input-modal-actions button.primary {
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+            border-color: var(--accent-primary);
+        }
+
+        #input-modal-actions button.primary:hover {
+            background: var(--accent-secondary);
+            border-color: var(--accent-secondary);
+            box-shadow: 0 0 15px var(--shadow-glow);
+        }
+
+        /* ===== SHORTCUTS MODAL ===== */
+        #shortcuts-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s ease;
+        }
+
+        #shortcuts-modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 85vh;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px var(--shadow-glow);
+            animation: slideUp 0.3s ease;
+        }
+
+        .shortcut-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+            transition: background 0.15s ease;
+        }
+
+        .shortcut-item:hover {
+            background: var(--bg-tertiary);
+            padding-left: 8px;
+            padding-right: 8px;
+            margin-left: -8px;
+            margin-right: -8px;
+            border-radius: 4px;
+        }
+
+        .shortcut-item:last-child {
+            border-bottom: none;
+        }
+
+        .shortcut-item kbd {
+            background: var(--bg-tertiary);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            color: var(--accent-secondary);
+            font-weight: 500;
+        }
+
+        .shortcut-item span {
+            color: var(--text-primary);
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <!-- SIDEBAR -->
+    <div id="sidebar">
+        <div id="sidebar-header">
+            <h1>JUGAADPRESS</h1>
+            <div class="subtitle">// HACKER'S NOTEBOOK</div>
+        </div>
+        <div id="page-controls">
+            <button id="btn-new-page" title="Create New Page">
+                <i class="fa-solid fa-plus"></i> New
+            </button>
+        </div>
+        <div id="page-list-container">
+            <ul id="page-list"></ul>
+        </div>
+    </div>
+
+    <!-- MAIN EDITOR -->
+    <div id="main">
+        <!-- TOOLBAR -->
+        <div id="toolbar">
+            <div class="toolbar-group">
+                <button id="btn-bold" title="Bold (Ctrl+B)"><i class="fa-solid fa-bold"></i> <span>Bold</span></button>
+                <button id="btn-italic" title="Italic (Ctrl+I)"><i class="fa-solid fa-italic"></i> <span>Italic</span></button>
+                <button id="btn-strikethrough" title="Strikethrough"><i class="fa-solid fa-strikethrough"></i> <span>Strike</span></button>
+            </div>
+            <div class="toolbar-separator"></div>
+            <div class="toolbar-group">
+                <button id="btn-heading" title="Heading (Ctrl+H)"><i class="fa-solid fa-heading"></i> <span>Heading</span></button>
+                <button id="btn-quote" title="Quote"><i class="fa-solid fa-quote-left"></i> <span>Quote</span></button>
+                <button id="btn-code" title="Inline Code (Ctrl+`)"><i class="fa-solid fa-code"></i> <span>Code</span></button>
+            </div>
+            <div class="toolbar-separator"></div>
+            <div class="toolbar-group">
+                <button id="btn-ul" title="Bullet List"><i class="fa-solid fa-list-ul"></i> <span>Bullets</span></button>
+                <button id="btn-ol" title="Numbered List"><i class="fa-solid fa-list-ol"></i> <span>Numbers</span></button>
+            </div>
+            <div class="toolbar-separator"></div>
+            <div class="toolbar-group">
+                <button id="btn-link" title="Insert Link - Type [[ for page autocomplete"><i class="fa-solid fa-link"></i> <span>Link</span></button>
+            </div>
+            <div class="toolbar-separator"></div>
+            <div class="toolbar-group">
+                <button id="btn-preview" title="Toggle Preview (Ctrl+P)"><i class="fa-solid fa-eye"></i> <span>Preview</span></button>
+            </div>
+        </div>
+
+        <!-- EDITOR & PREVIEW SPLIT -->
+        <div id="editor-container">
+            <div id="editor-pane">
+                <textarea id="editor" placeholder="# Start writing your markdown here...\n\nUse Ctrl+Z to undo, Ctrl+Y to redo"></textarea>
+            </div>
+            <div id="preview-pane" class="hidden">
+                <div id="preview-header">
+                    <span class="label">Live Preview</span>
+                </div>
+                <div id="preview-content"></div>
+            </div>
+        </div>
+
+        <!-- BOTTOM BAR -->
+        <div id="bottom-bar">
+            <div id="status-container">
+                <span id="status">Ready</span>
+                <span id="shortcuts-hint" style="cursor: pointer; user-select: none;" onclick="showShortcutsModal()">
+                    View Shortcuts
+                </span>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <a href="https://www.amazon.co.jp/hz/mycd/digital-console/contentlist/pdocs/dateDsc/"
+                   target="_blank"
+                   id="kindle-library-link"
+                   style="text-decoration: none; color: var(--accent-secondary); font-size: 13px; display: flex; align-items: center; gap: 5px; transition: color 0.2s ease;">
+                    <i class="fa-solid fa-book-open"></i> My Kindle Library
+                </a>
+                <button id="send-button"><i class="fa-solid fa-rocket"></i> Send to Kindle</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL (CONFIRMATION) -->
+    <div id="modal-overlay">
+        <div id="modal">
+            <h2 id="modal-title">Confirm Action</h2>
+            <p id="modal-message">Are you sure?</p>
+            <div id="modal-actions">
+                <button id="modal-cancel">Cancel</button>
+                <button id="modal-confirm" class="primary">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast">
+        <i class="fa-solid fa-circle-check"></i>
+        <span id="toast-message">Action completed!</span>
+    </div>
+
+    <!-- INPUT MODAL (FOR NEW PAGE) -->
+    <div id="input-modal-overlay">
+        <div id="input-modal">
+            <h2 id="input-modal-title">Create New Page</h2>
+            <p id="input-modal-message">Enter a filename for your new page (e.g., "03_chapter_one" or "notes"):</p>
+            <input type="text" id="input-modal-input" placeholder="e.g., 03_my_page">
+            <div id="input-modal-actions">
+                <button id="input-modal-cancel">Cancel</button>
+                <button id="input-modal-confirm" class="primary">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AUTOCOMPLETE DROPDOWN -->
+    <div id="autocomplete-dropdown"></div>
+
+    <!-- SHORTCUTS MODAL -->
+    <div id="shortcuts-modal-overlay" style="display: none;">
+        <div id="shortcuts-modal">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="color: var(--accent-primary); margin: 0;">⌨️ Keyboard Shortcuts</h2>
+                <button onclick="hideShortcutsModal()" style="background: none; border: none; color: var(--text-secondary); font-size: 24px; cursor: pointer; padding: 0; line-height: 1;">&times;</button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; max-height: 60vh; overflow-y: auto;">
+                <!-- Left Column -->
+                <div>
+                    <h3 style="color: var(--accent-secondary); font-size: 14px; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px;">✨ Formatting</h3>
+                    <div class="shortcut-item"><kbd>⌘ B</kbd><span>Bold</span></div>
+                    <div class="shortcut-item"><kbd>⌘ I</kbd><span>Italic</span></div>
+                    <div class="shortcut-item"><kbd>⌘ `</kbd><span>Inline Code</span></div>
+                    <div class="shortcut-item"><kbd>⌘ H</kbd><span>Heading</span></div>
+                    <div class="shortcut-item"><kbd>⌘ Q</kbd><span>Quote</span></div>
+                    <div class="shortcut-item"><kbd>⌘ E</kbd><span>Code Block</span></div>
+                    <div class="shortcut-item"><kbd>⌘ /</kbd><span>Comment</span></div>
+
+                    <h3 style="color: var(--accent-secondary); font-size: 14px; margin: 20px 0 12px; text-transform: uppercase; letter-spacing: 1px;">📝 Lists</h3>
+                    <div class="shortcut-item"><kbd>⌘ L</kbd><span>Bullet List</span></div>
+                    <div class="shortcut-item"><kbd>⌘ ⇧ L</kbd><span>Numbered List</span></div>
+
+                    <h3 style="color: var(--accent-secondary); font-size: 14px; margin: 20px 0 12px; text-transform: uppercase; letter-spacing: 1px;">🔗 Navigation</h3>
+                    <div class="shortcut-item"><kbd>⌘ K</kbd><span>Insert Link</span></div>
+                    <div class="shortcut-item"><kbd>⌘ P</kbd><span>Toggle Preview</span></div>
+                    <div class="shortcut-item"><kbd>⌘ S</kbd><span>Save</span></div>
+                </div>
+
+                <!-- Right Column -->
+                <div>
+                    <h3 style="color: var(--accent-secondary); font-size: 14px; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px;">✂️ Editing</h3>
+                    <div class="shortcut-item"><kbd>⌘ D</kbd><span>Duplicate Line</span></div>
+                    <div class="shortcut-item"><kbd>⌘ ⇧ K</kbd><span>Delete Line</span></div>
+                    <div class="shortcut-item"><kbd>⌘ ↵</kbd><span>New Line Below</span></div>
+                    <div class="shortcut-item"><kbd>⌘ [</kbd><span>Decrease Heading</span></div>
+                    <div class="shortcut-item"><kbd>⌘ ]</kbd><span>Increase Heading</span></div>
+                    <div class="shortcut-item"><kbd>⌥ ↑</kbd><span>Move Line Up</span></div>
+                    <div class="shortcut-item"><kbd>⌥ ↓</kbd><span>Move Line Down</span></div>
+                    <div class="shortcut-item"><kbd>⌘ Z</kbd><span>Undo</span></div>
+                    <div class="shortcut-item"><kbd>⌘ Y</kbd><span>Redo</span></div>
+
+                    <h3 style="color: var(--accent-secondary); font-size: 14px; margin: 20px 0 12px; text-transform: uppercase; letter-spacing: 1px;">🎯 Autocomplete</h3>
+                    <div class="shortcut-item"><kbd>[[</kbd><span>Trigger Link Picker</span></div>
+                    <div class="shortcut-item"><kbd>↑ ↓</kbd><span>Navigate Options</span></div>
+                    <div class="shortcut-item"><kbd>↵</kbd><span>Select</span></div>
+                    <div class="shortcut-item"><kbd>Esc</kbd><span>Cancel</span></div>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border-color); text-align: center; color: var(--text-dim); font-size: 12px;">
+                Press <kbd style="font-size: 11px; padding: 2px 5px;">Esc</kbd> to close
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== GLOBAL STATE =====
+        const state = {
+            currentPage: null,
+            saveTimeout: null,
+            previewVisible: false,
+            previewPage: null, // Track what's shown in preview independently
+            unsavedChanges: false,
+            sending: false,
+            allPages: [],
+            autocompleteVisible: false,
+            selectedAutocompleteIndex: 0
+        };
+
+        // ===== DOM ELEMENTS =====
+        const editor = document.getElementById('editor');
+        const pageList = document.getElementById('page-list');
+        const status = document.getElementById('status');
+        const previewPane = document.getElementById('preview-pane');
+        const previewContent = document.getElementById('preview-content');
+        const sendButton = document.getElementById('send-button');
+        const modalOverlay = document.getElementById('modal-overlay');
+        const toast = document.getElementById('toast');
+
+        // ===== UTILITY FUNCTIONS =====
+        function showToast(message, isError = false) {
+            const toastEl = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            toastMessage.textContent = message;
+            toastEl.classList.toggle('error', isError);
+            toastEl.classList.add('show');
+            setTimeout(() => toastEl.classList.remove('show'), 3000);
+        }
+
+        function showModal(title, message, onConfirm) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-message').textContent = message;
+            modalOverlay.classList.add('show');
+
+            const confirmBtn = document.getElementById('modal-confirm');
+            const cancelBtn = document.getElementById('modal-cancel');
+
+            const handleConfirm = () => {
+                onConfirm();
+                modalOverlay.classList.remove('show');
+                cleanup();
+            };
+
+            const handleCancel = () => {
+                modalOverlay.classList.remove('show');
+                cleanup();
+            };
+
+            const cleanup = () => {
+                confirmBtn.removeEventListener('click', handleConfirm);
+                cancelBtn.removeEventListener('click', handleCancel);
+                modalOverlay.removeEventListener('click', handleOverlayClick);
+            };
+
+            const handleOverlayClick = (e) => {
+                if (e.target === modalOverlay) handleCancel();
+            };
+
+            confirmBtn.addEventListener('click', handleConfirm);
+            cancelBtn.addEventListener('click', handleCancel);
+            modalOverlay.addEventListener('click', handleOverlayClick);
+        }
+
+        function updateStatus(text, type = 'normal') {
+            status.textContent = text;
+            status.className = type;
+        }
+
+        // ===== MARKDOWN FORMATTING =====
+        function getSelectedText() {
+            return {
+                start: editor.selectionStart,
+                end: editor.selectionEnd,
+                text: editor.value.substring(editor.selectionStart, editor.selectionEnd)
+            };
+        }
+
+        function wrapSelection(before, after = before) {
+            const selection = getSelectedText();
+            const text = editor.value;
+            const wrapped = `${before}${selection.text}${after}`;
+
+            // Check if already wrapped (toggle feature)
+            const beforeText = text.substring(selection.start - before.length, selection.start);
+            const afterText = text.substring(selection.end, selection.end + after.length);
+
+            editor.focus();
+
+            if (beforeText === before && afterText === after) {
+                // Unwrap (toggle off) - preserve undo with document.execCommand
+                const unwrapped = selection.text;
+                editor.setSelectionRange(selection.start - before.length, selection.end + after.length);
+                document.execCommand('insertText', false, unwrapped);
+                editor.setSelectionRange(selection.start - before.length, selection.end - before.length);
+                showToast('Formatting removed');
+            } else {
+                // Wrap (toggle on) - preserve undo with document.execCommand
+                document.execCommand('insertText', false, wrapped);
+                editor.setSelectionRange(selection.start + before.length, selection.end + before.length);
+                showToast('Formatting applied');
+            }
+
+            triggerChange();
+        }
+
+        function insertAtLineStart(prefix) {
+            const selection = getSelectedText();
+            const text = editor.value;
+            const lineStart = text.lastIndexOf('\n', selection.start - 1) + 1;
+            const lineEnd = text.indexOf('\n', selection.start);
+            const line = text.substring(lineStart, lineEnd === -1 ? text.length : lineEnd);
+
+            editor.focus();
+
+            // Toggle: check if line already has the prefix
+            if (line.startsWith(prefix)) {
+                // Remove prefix - preserve undo
+                const newLine = line.substring(prefix.length);
+                editor.setSelectionRange(lineStart, lineEnd === -1 ? text.length : lineEnd);
+                document.execCommand('insertText', false, newLine);
+                editor.setSelectionRange(selection.start - prefix.length, selection.end - prefix.length);
+            } else {
+                // Add prefix - preserve undo
+                const newLine = prefix + line;
+                editor.setSelectionRange(lineStart, lineEnd === -1 ? text.length : lineEnd);
+                document.execCommand('insertText', false, newLine);
+                editor.setSelectionRange(selection.start + prefix.length, selection.end + prefix.length);
+            }
+
+            triggerChange();
+        }
+
+        function triggerChange() {
+            state.unsavedChanges = true;
+            updatePreview();
+            clearTimeout(state.saveTimeout);
+            updateStatus('Typing...', 'normal');
+            state.saveTimeout = setTimeout(savePageContent, 1500);
+        }
+
+        // ===== ADVANCED EDITING FUNCTIONS =====
+        function duplicateLine() {
+            const selection = getSelectedText();
+            const text = editor.value;
+            const lineStart = text.lastIndexOf('\n', selection.start - 1) + 1;
+            const lineEnd = text.indexOf('\n', selection.start);
+            const line = text.substring(lineStart, lineEnd === -1 ? text.length : lineEnd);
+
+            editor.focus();
+            editor.setSelectionRange(lineEnd === -1 ? text.length : lineEnd, lineEnd === -1 ? text.length : lineEnd);
+            document.execCommand('insertText', false, '\n' + line);
+            showToast('Line duplicated');
+            triggerChange();
+        }
+
+        function deleteLine() {
+            const selection = getSelectedText();
+            const text = editor.value;
+            const lineStart = text.lastIndexOf('\n', selection.start - 1) + 1;
+            const lineEnd = text.indexOf('\n', selection.start);
+
+            editor.focus();
+            if (lineStart === 0 && lineEnd === -1) {
+                // Only line in editor
+                editor.setSelectionRange(0, text.length);
+            } else if (lineEnd === -1) {
+                // Last line
+                editor.setSelectionRange(lineStart - 1, text.length);
+            } else {
+                // Middle line
+                editor.setSelectionRange(lineStart, lineEnd + 1);
+            }
+            document.execCommand('delete');
+            showToast('Line deleted');
+            triggerChange();
+        }
+
+        function insertLineBelow() {
+            const selection = getSelectedText();
+            const text = editor.value;
+            const lineEnd = text.indexOf('\n', selection.start);
+
+            editor.focus();
+            const pos = lineEnd === -1 ? text.length : lineEnd;
+            editor.setSelectionRange(pos, pos);
+            document.execCommand('insertText', false, '\n');
+            triggerChange();
+        }
+
+        function toggleComment() {
+            const selection = getSelectedText();
+            const text = editor.value;
+
+            editor.focus();
+
+            if (selection.text.startsWith('<!-- ') && selection.text.endsWith(' -->')) {
+                // Uncomment
+                const uncommented = selection.text.slice(5, -4);
+                document.execCommand('insertText', false, uncommented);
+                showToast('Comment removed');
+            } else {
+                // Comment
+                const commented = `<!-- ${selection.text} -->`;
+                document.execCommand('insertText', false, commented);
+                showToast('Commented');
+            }
+            triggerChange();
+        }
+
+        function toggleCodeBlock() {
+            const selection = getSelectedText();
+
+            editor.focus();
+
+            if (selection.text.startsWith('```\n') && selection.text.endsWith('\n```')) {
+                // Remove code block
+                const unblocked = selection.text.slice(4, -4);
+                document.execCommand('insertText', false, unblocked);
+                showToast('Code block removed');
+            } else {
+                // Add code block
+                const blocked = `\`\`\`\n${selection.text}\n\`\`\``;
+                document.execCommand('insertText', false, blocked);
+                showToast('Code block added');
+            }
+            triggerChange();
+        }
+
+        function moveLineUp() {
+            const selection = getSelectedText();
+            const text = editor.value;
+            const lineStart = text.lastIndexOf('\n', selection.start - 1) + 1;
+            const lineEnd = text.indexOf('\n', selection.start);
+            const currentLine = text.substring(lineStart, lineEnd === -1 ? text.length : lineEnd);
+
+            if (lineStart === 0) {
+                showToast('Already at top');
+                return; // Already at top
+            }
+
+            const prevLineStart = text.lastIndexOf('\n', lineStart - 2) + 1;
+            const prevLine = text.substring(prevLineStart, lineStart - 1);
+
+            editor.focus();
+            editor.setSelectionRange(prevLineStart, lineEnd === -1 ? text.length : lineEnd);
+            document.execCommand('insertText', false, currentLine + '\n' + prevLine);
+
+            // Restore cursor position
+            const newCursorPos = prevLineStart + (selection.start - lineStart);
+            editor.setSelectionRange(newCursorPos, newCursorPos);
+            triggerChange();
+        }
+
+        function moveLineDown() {
+            const selection = getSelectedText();
+            const text = editor.value;
+            const lineStart = text.lastIndexOf('\n', selection.start - 1) + 1;
+            const lineEnd = text.indexOf('\n', selection.start);
+            const currentLine = text.substring(lineStart, lineEnd === -1 ? text.length : lineEnd);
+
+            if (lineEnd === -1) {
+                showToast('Already at bottom');
+                return; // Already at bottom
+            }
+
+            const nextLineEnd = text.indexOf('\n', lineEnd + 1);
+            const nextLine = text.substring(lineEnd + 1, nextLineEnd === -1 ? text.length : nextLineEnd);
+
+            editor.focus();
+            editor.setSelectionRange(lineStart, nextLineEnd === -1 ? text.length : nextLineEnd);
+            document.execCommand('insertText', false, nextLine + '\n' + currentLine);
+
+            // Restore cursor position
+            const newCursorPos = lineStart + nextLine.length + 1 + (selection.start - lineStart);
+            editor.setSelectionRange(newCursorPos, newCursorPos);
+            triggerChange();
+        }
+
+        function increaseHeading() {
+            const selection = getSelectedText();
+            const text = editor.value;
+            const lineStart = text.lastIndexOf('\n', selection.start - 1) + 1;
+            const lineEnd = text.indexOf('\n', selection.start);
+            const line = text.substring(lineStart, lineEnd === -1 ? text.length : lineEnd);
+
+            editor.focus();
+
+            if (line.startsWith('# ')) {
+                const newLine = '#' + line;
+                editor.setSelectionRange(lineStart, lineEnd === -1 ? text.length : lineEnd);
+                document.execCommand('insertText', false, newLine);
+                showToast('Heading level increased');
+            } else {
+                showToast('Not a heading');
+            }
+            triggerChange();
+        }
+
+        function decreaseHeading() {
+            const selection = getSelectedText();
+            const text = editor.value;
+            const lineStart = text.lastIndexOf('\n', selection.start - 1) + 1;
+            const lineEnd = text.indexOf('\n', selection.start);
+            const line = text.substring(lineStart, lineEnd === -1 ? text.length : lineEnd);
+
+            editor.focus();
+
+            if (line.startsWith('## ')) {
+                const newLine = line.substring(1);
+                editor.setSelectionRange(lineStart, lineEnd === -1 ? text.length : lineEnd);
+                document.execCommand('insertText', false, newLine);
+                showToast('Heading level decreased');
+            } else {
+                showToast('Not a heading or already minimum');
+            }
+            triggerChange();
+        }
+
+        function showShortcutsModal() {
+            const modal = document.getElementById('shortcuts-modal-overlay');
+            modal.style.display = 'flex';
+
+            // Close on Esc or click outside
+            const closeHandler = (e) => {
+                if (e.key === 'Escape' || e.target === modal) {
+                    hideShortcutsModal();
+                }
+            };
+            modal.addEventListener('click', closeHandler);
+            document.addEventListener('keydown', closeHandler);
+        }
+
+        function hideShortcutsModal() {
+            const modal = document.getElementById('shortcuts-modal-overlay');
+            modal.style.display = 'none';
+        }
+
+        // ===== TOOLBAR ACTIONS =====
+        document.getElementById('btn-bold').addEventListener('click', () => wrapSelection('**'));
+        document.getElementById('btn-italic').addEventListener('click', () => wrapSelection('*'));
+        document.getElementById('btn-strikethrough').addEventListener('click', () => wrapSelection('~~'));
+        document.getElementById('btn-heading').addEventListener('click', () => insertAtLineStart('## '));
+        document.getElementById('btn-quote').addEventListener('click', () => insertAtLineStart('> '));
+        document.getElementById('btn-code').addEventListener('click', () => wrapSelection('`'));
+        document.getElementById('btn-ul').addEventListener('click', () => insertAtLineStart('- '));
+        document.getElementById('btn-ol').addEventListener('click', () => insertAtLineStart('1. '));
+        document.getElementById('btn-link').addEventListener('click', () => {
+            const selection = getSelectedText();
+            const selectedText = selection.text || 'link text';
+
+            // Store the selected text and show autocomplete
+            autocompleteContext.customText = selectedText;
+            showAutocomplete(state.allPages, selection.start, selectedText);
+        });
+
+        document.getElementById('btn-preview').addEventListener('click', togglePreview);
+
+        function togglePreview() {
+            state.previewVisible = !state.previewVisible;
+            previewPane.classList.toggle('hidden', !state.previewVisible);
+            document.getElementById('btn-preview').classList.toggle('active', state.previewVisible);
+            if (state.previewVisible) {
+                updatePreview();
+            }
+        }
+
+        async function updatePreview(pageToShow = null) {
+            if (!state.previewVisible) return;
+
+            let content;
+            let pageName;
+
+            if (pageToShow) {
+                // Load specific page in preview (independent navigation)
+                try {
+                    const response = await fetch(`/api/page/${pageToShow}`);
+                    content = await response.text();
+                    state.previewPage = pageToShow;
+                    pageName = pageToShow;
+                } catch (error) {
+                    showToast(`Error loading ${pageToShow}`, 'error');
+                    return;
+                }
+            } else {
+                // Show current editor content
+                content = editor.value || '';
+                state.previewPage = state.currentPage;
+                pageName = state.currentPage;
+            }
+
+            previewContent.innerHTML = marked.parse(content);
+
+            // Intercept internal link clicks
+            const links = previewContent.querySelectorAll('a[href^="./"]');
+            links.forEach(link => {
+                link.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    const href = link.getAttribute('href');
+
+                    // Extract filename from ./filename.md and decode URL encoding
+                    const match = href.match(/\.\/(.+)/);
+                    if (match) {
+                        const filename = decodeURIComponent(match[1]);
+                        // Check if file exists in our pages
+                        if (state.allPages.includes(filename)) {
+                            // Navigate preview independently
+                            await updatePreview(filename);
+                            showToast(`Preview: ${filename}`);
+                        } else {
+                            showToast(`Page not found: ${filename}`, 'error');
+                        }
+                    }
+                });
+            });
+        }
+
+        // ===== KEYBOARD SHORTCUTS =====
+        editor.addEventListener('keydown', (e) => {
+            // Handle autocomplete navigation
+            if (state.autocompleteVisible) {
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    updateAutocompleteSelection(1);
+                    return;
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    updateAutocompleteSelection(-1);
+                    return;
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    selectCurrentAutocomplete();
+                    return;
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    hideAutocomplete();
+                    return;
+                }
+            }
+
+            if (e.ctrlKey || e.metaKey) {
+                if (e.shiftKey) {
+                    // Cmd+Shift shortcuts
+                    switch(e.key.toLowerCase()) {
+                        case 'k':
+                            e.preventDefault();
+                            deleteLine();
+                            break;
+                        case 'l':
+                            e.preventDefault();
+                            document.getElementById('btn-ol').click();
+                            break;
+                        case '[':
+                            e.preventDefault();
+                            decreaseHeading();
+                            break;
+                        case ']':
+                            e.preventDefault();
+                            increaseHeading();
+                            break;
+                    }
+                } else {
+                    // Regular Cmd shortcuts
+                    switch(e.key.toLowerCase()) {
+                        case 'b':
+                            e.preventDefault();
+                            wrapSelection('**');
+                            break;
+                        case 'i':
+                            e.preventDefault();
+                            wrapSelection('*');
+                            break;
+                        case 'h':
+                            e.preventDefault();
+                            insertAtLineStart('## ');
+                            break;
+                        case 'k':
+                            e.preventDefault();
+                            document.getElementById('btn-link').click();
+                            break;
+                        case 'p':
+                            e.preventDefault();
+                            togglePreview();
+                            break;
+                        case 's':
+                            e.preventDefault();
+                            savePageContent();
+                            break;
+                        case '`':
+                            e.preventDefault();
+                            wrapSelection('`');
+                            break;
+                        case 'd':
+                            e.preventDefault();
+                            duplicateLine();
+                            break;
+                        case '/':
+                            e.preventDefault();
+                            toggleComment();
+                            break;
+                        case 'e':
+                            e.preventDefault();
+                            toggleCodeBlock();
+                            break;
+                        case 'q':
+                            e.preventDefault();
+                            document.getElementById('btn-quote').click();
+                            break;
+                        case 'l':
+                            e.preventDefault();
+                            document.getElementById('btn-ul').click();
+                            break;
+                        case 'enter':
+                            e.preventDefault();
+                            insertLineBelow();
+                            break;
+                        case '[':
+                            e.preventDefault();
+                            decreaseHeading();
+                            break;
+                        case ']':
+                            e.preventDefault();
+                            increaseHeading();
+                            break;
+                    }
+                }
+            }
+
+            // Alt+Up/Down to move lines
+            if (e.altKey && !e.ctrlKey && !e.metaKey) {
+                if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    moveLineUp();
+                } else if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    moveLineDown();
+                }
+            }
+        });
+
+        // ===== AUTOCOMPLETE TRIGGER =====
+        editor.addEventListener('input', (e) => {
+            const text = editor.value;
+            const cursorPos = editor.selectionStart;
+            const beforeCursor = text.substring(0, cursorPos);
+
+            // Check if user typed [[
+            if (beforeCursor.endsWith('[[')) {
+                showAutocomplete(state.allPages, cursorPos);
+            } else if (state.autocompleteVisible) {
+                // Check if still in autocomplete context
+                const linkStart = beforeCursor.lastIndexOf('[[');
+                const linkEnd = beforeCursor.lastIndexOf(']]');
+
+                if (linkStart === -1 || linkEnd > linkStart) {
+                    hideAutocomplete();
+                }
+            }
+        });
+
+        // ===== AUTO-SAVE =====
+        editor.addEventListener('input', triggerChange);
+
+        // ===== INPUT MODAL FUNCTIONS =====
+        function showInputModal(title, message, placeholder, onConfirm) {
+            const inputModalOverlay = document.getElementById('input-modal-overlay');
+            const inputModalInput = document.getElementById('input-modal-input');
+
+            document.getElementById('input-modal-title').textContent = title;
+            document.getElementById('input-modal-message').textContent = message;
+            inputModalInput.placeholder = placeholder;
+            inputModalInput.value = '';
+            inputModalOverlay.classList.add('show');
+            inputModalInput.focus();
+
+            const confirmBtn = document.getElementById('input-modal-confirm');
+            const cancelBtn = document.getElementById('input-modal-cancel');
+
+            const handleConfirm = () => {
+                const value = inputModalInput.value.trim();
+                if (value) {
+                    onConfirm(value);
+                    inputModalOverlay.classList.remove('show');
+                    cleanup();
+                }
+            };
+
+            const handleCancel = () => {
+                inputModalOverlay.classList.remove('show');
+                cleanup();
+            };
+
+            const handleEnterKey = (e) => {
+                if (e.key === 'Enter') {
+                    handleConfirm();
+                }
+            };
+
+            const cleanup = () => {
+                confirmBtn.removeEventListener('click', handleConfirm);
+                cancelBtn.removeEventListener('click', handleCancel);
+                inputModalInput.removeEventListener('keydown', handleEnterKey);
+                inputModalOverlay.removeEventListener('click', handleOverlayClick);
+            };
+
+            const handleOverlayClick = (e) => {
+                if (e.target === inputModalOverlay) handleCancel();
+            };
+
+            confirmBtn.addEventListener('click', handleConfirm);
+            cancelBtn.addEventListener('click', handleCancel);
+            inputModalInput.addEventListener('keydown', handleEnterKey);
+            inputModalOverlay.addEventListener('click', handleOverlayClick);
+        }
+
+        // ===== PAGE RENAME FUNCTION =====
+        async function enableRename(pageNameSpan, filename) {
+            // Prevent multiple renames at once
+            if (document.querySelector('.rename-input')) return;
+
+            const originalText = filename;
+            const filenameWithoutExt = filename.replace('.md', '');
+
+            // Create input element
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'rename-input';
+            input.value = filenameWithoutExt;
+
+            // Replace text with input
+            pageNameSpan.textContent = '';
+            pageNameSpan.appendChild(input);
+            pageNameSpan.classList.add('editing');
+            input.focus();
+            input.select();
+
+            const finishRename = async (save) => {
+                const newFilename = input.value.trim();
+
+                if (save && newFilename && newFilename !== filenameWithoutExt) {
+                    // Attempt rename
+                    try {
+                        updateStatus('Renaming page...', 'saving');
+
+                        const response = await fetch(`/api/page/${filename}/rename`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ new_filename: newFilename })
+                        });
+
+                        if (response.ok) {
+                            const data = await response.json();
+                            showToast('✓ Page renamed successfully!');
+
+                            // Update current page reference if this was the active page
+                            if (state.currentPage === filename) {
+                                state.currentPage = data.new_filename;
+                            }
+
+                            await loadPageList();
+                            updateStatus('Ready', 'saved');
+                        } else {
+                            const error = await response.text();
+                            showToast(`Failed to rename: ${error}`, true);
+                            pageNameSpan.textContent = originalText;
+                            pageNameSpan.classList.remove('editing');
+                        }
+                    } catch (error) {
+                        showToast('Network error while renaming page', true);
+                        pageNameSpan.textContent = originalText;
+                        pageNameSpan.classList.remove('editing');
+                    }
+                } else {
+                    // Cancel rename
+                    pageNameSpan.textContent = originalText;
+                    pageNameSpan.classList.remove('editing');
+                }
+            };
+
+            input.addEventListener('blur', () => {
+                // Small delay to ensure blur doesn't interfere with input
+                setTimeout(() => finishRename(true), 100);
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    input.blur(); // Trigger blur which will save
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    finishRename(false);
+                }
+            });
+
+            // Prevent blur when clicking inside the input
+            input.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+            });
+
+            input.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+        }
+
+        // ===== AUTOCOMPLETE FUNCTIONS =====
+        function showAutocomplete(pages, cursorPos, customText = null) {
+            const dropdown = document.getElementById('autocomplete-dropdown');
+            const rect = editor.getBoundingClientRect();
+
+            // Calculate position (simplified - appears below cursor area)
+            dropdown.style.left = `${rect.left + 100}px`;
+            dropdown.style.top = `${rect.top + 100}px`;
+
+            // Store custom text in context
+            if (customText !== null) {
+                autocompleteContext.customText = customText;
+            }
+
+            dropdown.innerHTML = '';
+            pages.forEach((page, index) => {
+                const item = document.createElement('div');
+                item.className = 'autocomplete-item';
+                if (index === state.selectedAutocompleteIndex) {
+                    item.classList.add('selected');
+                }
+                item.textContent = page;
+                item.onclick = () => {
+                    insertPageLink(page, autocompleteContext.customText);
+                    autocompleteContext.customText = null; // Reset after use
+                };
+                dropdown.appendChild(item);
+            });
+
+            dropdown.classList.add('show');
+            state.autocompleteVisible = true;
+        }
+
+        function hideAutocomplete() {
+            const dropdown = document.getElementById('autocomplete-dropdown');
+            dropdown.classList.remove('show');
+            state.autocompleteVisible = false;
+            state.selectedAutocompleteIndex = 0;
+            autocompleteContext.customText = null; // Reset context
+        }
+
+        function insertPageLink(page, customText = null) {
+            const selection = getSelectedText();
+            const text = editor.value;
+            const beforeCursor = text.substring(0, selection.start);
+            const afterCursor = text.substring(selection.end);
+
+            let linkText, linkStart, newPos;
+
+            editor.focus();
+
+            if (customText !== null) {
+                // Toolbar button mode - use custom text (selected text or provided text)
+                const encodedPage = encodeURIComponent(page).replace(/%2F/g, '/');
+                linkText = `[${customText}](./${encodedPage})`;
+
+                // Replace selection with link - preserve undo
+                document.execCommand('insertText', false, linkText);
+                newPos = selection.start + linkText.length;
+            } else {
+                // [[ autocomplete mode - find [[ position
+                linkStart = beforeCursor.lastIndexOf('[[');
+                if (linkStart === -1) return;
+
+                const pageName = page.replace('.md', '').replace(/_/g, ' ');
+                const encodedPage = encodeURIComponent(page).replace(/%2F/g, '/');
+                linkText = `[${pageName}](./${encodedPage})`;
+
+                // Replace [[ with link - preserve undo
+                editor.setSelectionRange(linkStart, selection.start);
+                document.execCommand('insertText', false, linkText);
+                newPos = linkStart + linkText.length;
+            }
+
+            // Position cursor after the link
+            editor.setSelectionRange(newPos, newPos);
+
+            hideAutocomplete();
+            triggerChange();
+        }
+
+        function updateAutocompleteSelection(direction) {
+            if (!state.autocompleteVisible) return;
+
+            const items = document.querySelectorAll('.autocomplete-item');
+            if (items.length === 0) return;
+
+            state.selectedAutocompleteIndex += direction;
+
+            if (state.selectedAutocompleteIndex < 0) {
+                state.selectedAutocompleteIndex = items.length - 1;
+            } else if (state.selectedAutocompleteIndex >= items.length) {
+                state.selectedAutocompleteIndex = 0;
+            }
+
+            items.forEach((item, index) => {
+                item.classList.toggle('selected', index === state.selectedAutocompleteIndex);
+            });
+        }
+
+        function selectCurrentAutocomplete() {
+            const selected = document.querySelector('.autocomplete-item.selected');
+            if (selected) {
+                selected.click();
+            }
+        }
+
+        // Store context for autocomplete (used by toolbar button)
+        let autocompleteContext = {
+            customText: null
+        };
+
+        // ===== API FUNCTIONS =====
+        async function loadPageList() {
+            try {
+                const response = await fetch('/api/pages');
+                const pages = await response.json();
+                state.allPages = pages; // Store for autocomplete
+                pageList.innerHTML = '';
+                pages.forEach(page => {
+                    const li = document.createElement('li');
+
+                    const pageName = document.createElement('span');
+                    pageName.className = 'page-name';
+                    pageName.textContent = page;
+
+                    // Store click timeout for detecting single vs rename intent
+                    let clickTimeout = null;
+                    let clickCount = 0;
+
+                    pageName.onclick = (e) => {
+                        e.stopPropagation();
+                        clickCount++;
+
+                        if (clickCount === 1) {
+                            // First click - wait to see if it's a rename (second click)
+                            clickTimeout = setTimeout(() => {
+                                // Single click - load page
+                                loadPageContent(page);
+                                clickCount = 0;
+                            }, 200); // Snappy but still detects double-click
+                        } else if (clickCount === 2) {
+                            // Second click within timeout - enter rename mode
+                            clearTimeout(clickTimeout);
+                            clickCount = 0;
+                            enableRename(pageName, page);
+                        }
+                    };
+
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'delete-page-btn';
+                    deleteBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+                    deleteBtn.title = 'Delete page';
+                    deleteBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        deletePage(page);
+                    };
+
+                    li.appendChild(pageName);
+                    li.appendChild(deleteBtn);
+                    pageList.appendChild(li);
+                });
+                if (pages.length > 0 && !state.currentPage) {
+                    loadPageContent(pages[0]);
+                }
+            } catch (error) {
+                showToast('Failed to load pages', true);
+                updateStatus('Error loading pages', 'error');
+            }
+        }
+
+        async function loadPageContent(filename) {
+            try {
+                if (state.unsavedChanges && state.currentPage) {
+                    showModal(
+                        'Unsaved Changes',
+                        `You have unsaved changes in ${state.currentPage}. Continue anyway?`,
+                        () => loadPage(filename)
+                    );
+                } else {
+                    loadPage(filename);
+                }
+            } catch (error) {
+                showToast('Failed to load page', true);
+                updateStatus('Error loading page', 'error');
+            }
+        }
+
+        async function loadPage(filename) {
+            // Add loading state for smooth fade
+            editor.classList.add('loading');
+
+            const response = await fetch(`/api/page/${filename}`);
+            const content = await response.text();
+
+            // Quick fade transition (50ms) - snappy but smooth
+            setTimeout(() => {
+                editor.value = content;
+                state.currentPage = filename;
+                state.unsavedChanges = false;
+
+                document.querySelectorAll('#page-list li').forEach(li => {
+                    const pageName = li.querySelector('.page-name');
+                    li.classList.toggle('active', pageName && pageName.textContent === filename);
+                });
+
+                updateStatus(`${filename} loaded`, 'saved');
+                editor.classList.remove('loading');
+
+                // Update preview if it's visible
+                if (state.previewVisible) {
+                    updatePreview();
+                }
+
+                // Only focus editor if preview is not visible
+                if (!state.previewVisible) {
+                    editor.focus();
+                }
+            }, 50); // Just enough for smooth transition, not noticeable delay
+        }
+
+        async function savePageContent() {
+            if (!state.currentPage) return;
+
+            try {
+                updateStatus('Saving...', 'saving');
+                await fetch(`/api/page/${state.currentPage}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain; charset=UTF-8' },
+                    body: editor.value
+                });
+                state.unsavedChanges = false;
+                updateStatus('Saved!', 'saved');
+                showToast('Page saved successfully');
+            } catch (error) {
+                updateStatus('Save failed', 'error');
+                showToast('Failed to save page', true);
+            }
+        }
+
+        async function sendToKindle() {
+            if (state.sending) return;
+
+            showModal(
+                'Send to Kindle',
+                'Compile all pages and send the book to your Kindle?',
+                async () => {
+                    try {
+                        state.sending = true;
+                        sendButton.disabled = true;
+                        updateStatus('Compiling and sending to Kindle...', 'saving');
+
+                        const response = await fetch('/api/send-to-kindle', { method: 'POST' });
+
+                        if (response.ok) {
+                            updateStatus('Book successfully sent!', 'saved');
+                            showToast('Book sent to Kindle successfully!');
+                        } else {
+                            const error = await response.text();
+                            updateStatus('Send failed', 'error');
+                            showToast(`Failed to send: ${error}`, true);
+                        }
+                    } catch (error) {
+                        updateStatus('Send failed', 'error');
+                        showToast('Network error while sending to Kindle', true);
+                    } finally {
+                        state.sending = false;
+                        sendButton.disabled = false;
+                    }
+                }
+            );
+        }
+
+        sendButton.addEventListener('click', sendToKindle);
+
+        // Kindle Library link hover effect
+        const kindleLink = document.getElementById('kindle-library-link');
+        kindleLink.addEventListener('mouseover', () => {
+            kindleLink.style.color = '#3fb950';
+        });
+        kindleLink.addEventListener('mouseout', () => {
+            kindleLink.style.color = '#58a6ff';
+        });
+
+        // ===== PAGE MANAGEMENT FUNCTIONS =====
+        async function createNewPage(filename) {
+            try {
+                updateStatus('Creating page...', 'saving');
+                const newPageBtn = document.getElementById('btn-new-page');
+                newPageBtn.disabled = true;
+
+                const response = await fetch('/api/page', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showToast('✓ Page created successfully!');
+                    await loadPageList();
+
+                    // Small delay for smoother transition
+                    setTimeout(() => {
+                        loadPageContent(data.filename);
+                    }, 150);
+                } else {
+                    const error = await response.text();
+                    showToast(`Failed to create page: ${error}`, true);
+                    updateStatus('Error', 'error');
+                }
+            } catch (error) {
+                showToast('Network error while creating page', true);
+                updateStatus('Error', 'error');
+            } finally {
+                setTimeout(() => {
+                    const newPageBtn = document.getElementById('btn-new-page');
+                    newPageBtn.disabled = false;
+                }, 300);
+            }
+        }
+
+        async function deletePage(filename) {
+            showModal(
+                '⚠️ Delete Page',
+                `Are you sure you want to delete "${filename}"? This action cannot be undone.`,
+                async () => {
+                    try {
+                        updateStatus('Deleting page...', 'saving');
+
+                        const response = await fetch(`/api/page/${filename}`, {
+                            method: 'DELETE'
+                        });
+
+                        if (response.ok) {
+                            showToast('✓ Page deleted successfully!');
+
+                            // If deleted page was the current one, smoothly clear editor
+                            if (state.currentPage === filename) {
+                                editor.classList.add('loading');
+                                setTimeout(() => {
+                                    state.currentPage = null;
+                                    editor.value = '';
+                                    state.unsavedChanges = false;
+                                    editor.classList.remove('loading');
+                                }, 100);
+                            }
+
+                            await loadPageList();
+                            updateStatus('Ready', 'saved');
+                        } else {
+                            const error = await response.text();
+                            showToast(`Failed to delete page: ${error}`, true);
+                            updateStatus('Error', 'error');
+                        }
+                    } catch (error) {
+                        showToast('Network error while deleting page', true);
+                        updateStatus('Error', 'error');
+                    }
+                }
+            );
+        }
+
+        // ===== NEW PAGE BUTTON =====
+        document.getElementById('btn-new-page').addEventListener('click', () => {
+            showInputModal(
+                'Create New Page',
+                'Enter a filename for your new page (e.g., "03_chapter_one" or "notes"):',
+                'e.g., 03_my_page',
+                createNewPage
+            );
+        });
+
+        // ===== WARN ON PAGE LEAVE =====
+        window.addEventListener('beforeunload', (e) => {
+            if (state.unsavedChanges) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+
+        // ===== INITIALIZE =====
+        document.addEventListener('DOMContentLoaded', () => {
+            loadPageList();
+            editor.focus();
+        });
+    </script>
+</body>
+</html>

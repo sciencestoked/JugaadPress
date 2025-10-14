@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+jugaadpressenv/
+
+# Secrets
+config.py
+
+# Generated files
+*.epub
+test_undo.html
+
+# macOS
+.DS_Store
