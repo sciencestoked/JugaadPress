@@ -113,14 +113,20 @@
 
                     <form onsubmit="saveBookSettings(event)">
                         <div class="form-group">
-                            <label>Book Title</label>
+                            <label>Book Name</label>
                             <div style="display: flex; gap: var(--space-xs);">
-                                <input type="text" id="bookTitle" placeholder="My Amazing Book" required style="flex: 1;">
+                                <input type="text" id="bookName" readonly style="flex: 1; background: var(--bg-tertiary); cursor: default;">
                                 <button type="button" class="btn btn-secondary btn-sm" onclick="renameBook()" title="Rename book folder" style="white-space: nowrap;">
                                     <i class="fas fa-edit"></i> Rename
                                 </button>
                             </div>
-                            <small>Title that appears on your Kindle</small>
+                            <small>The folder name in your Drive (read-only)</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Kindle Title</label>
+                            <input type="text" id="bookTitle" placeholder="My Amazing Book" required>
+                            <small>Title that appears on your Kindle device</small>
                         </div>
 
                         <div class="form-group">
@@ -313,6 +319,9 @@
 
         async function loadBookSettings(bookName) {
             try {
+                // Update book name field (read-only)
+                document.getElementById('bookName').value = bookName;
+
                 // Show loading state
                 const titleInput = document.getElementById('bookTitle');
                 titleInput.value = 'Loading...';
@@ -579,6 +588,7 @@
                     await loadBookSettings(newName);
 
                     document.getElementById('selectedBookName').textContent = newName;
+                    document.getElementById('bookName').value = newName;
                     hideLoading();
                     showToast(`✓ Renamed "${oldName}" to "${newName}"`, 'success');
                 } catch (error) {
