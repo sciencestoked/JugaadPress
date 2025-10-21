@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JugaadPress - Button Catalogue</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Design System -->
+    <link rel="stylesheet" href="static/css/variables.css">
+    <link rel="stylesheet" href="static/css/reset.css">
+    <link rel="stylesheet" href="static/css/animations.css">
+    <link rel="stylesheet" href="static/css/buttons.css">
+    <link rel="stylesheet" href="static/css/components.css">
+
+    <style>
+        body {
+            padding: var(--space-2xl);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: var(--space-2xl);
+            padding-bottom: var(--space-xl);
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .header h1 {
+            font-size: var(--font-size-3xl);
+            color: var(--accent-primary);
+            margin-bottom: var(--space-md);
+            text-shadow: 0 0 20px var(--shadow-glow-primary);
+        }
+
+        .header h1::before {
+            content: "> ";
+            animation: blink 1.5s infinite;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: var(--font-size-lg);
+        }
+
+        .section {
+            margin-bottom: var(--space-2xl);
+            padding: var(--space-xl);
+            background: var(--bg-secondary);
+            border: var(--border-width) solid var(--border-color);
+            border-radius: var(--border-radius-lg);
+        }
+
+        .section-title {
+            font-size: var(--font-size-xl);
+            color: var(--accent-primary);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .section-title::before {
+            content: "$";
+            color: var(--accent-secondary);
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-xl);
+        }
+
+        .button-demo {
+            background: var(--bg-tertiary);
+            padding: var(--space-lg);
+            border-radius: var(--border-radius-md);
+            border: var(--border-width) solid var(--border-color);
+        }
+
+        .button-demo h3 {
+            color: var(--text-primary);
+            font-size: var(--font-size-md);
+            margin-bottom: var(--space-sm);
+            font-weight: var(--font-weight-semibold);
+        }
+
+        .button-demo p {
+            color: var(--text-dim);
+            font-size: var(--font-size-sm);
+            margin-bottom: var(--space-md);
+            line-height: var(--line-height-relaxed);
+        }
+
+        .button-preview {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: var(--space-xl) var(--space-md);
+            background: var(--bg-primary);
+            border-radius: var(--border-radius-sm);
+            margin-bottom: var(--space-md);
+            min-height: 100px;
+        }
+
+        .code-block {
+            background: var(--code-bg);
+            padding: var(--space-md);
+            border-radius: var(--border-radius-sm);
+            border: var(--border-width) solid var(--border-color);
+            font-size: var(--font-size-xs);
+            color: var(--accent-secondary);
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block code {
+            font-family: var(--font-mono);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: var(--space-sm);
+            right: var(--space-sm);
+            background: var(--bg-tertiary);
+            border: var(--border-width) solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 0.3rem 0.6rem;
+            border-radius: var(--border-radius-sm);
+            cursor: pointer;
+            font-size: var(--font-size-xs);
+            transition: all var(--transition-fast);
+        }
+
+        .copy-btn:hover {
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+            border-color: var(--accent-primary);
+        }
+
+        .note {
+            background: rgba(88, 166, 255, 0.05);
+            border-left: 3px solid var(--accent-secondary);
+            padding: var(--space-md);
+            margin-top: var(--space-lg);
+            border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
+        }
+
+        .note::before {
+            content: "💡 ";
+        }
+
+        .note p {
+            color: var(--text-secondary);
+            font-size: var(--font-size-sm);
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Button Catalogue</h1>
+        <p>// All button styles available in JugaadPress</p>
+    </div>
+
+    <!-- BASIC VARIANTS -->
+    <div class="section">
+        <h2 class="section-title">Basic Variants</h2>
+        <div class="button-grid">
+            <!-- Primary -->
+            <div class="button-demo">
+                <h3>Primary Button</h3>
+                <p>Main actions with green glow effect</p>
+                <div class="button-preview">
+                    <button class="btn btn-primary">
+                        <i class="fas fa-check"></i> Save Changes
+                    </button>
+                </div>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i></button>
+                    <code>&lt;button class="btn btn-primary"&gt;
+  &lt;i class="fas fa-check"&gt;&lt;/i&gt; Save Changes
+&lt;/button&gt;</code>
+                </div>
+            </div>
+
+            <!-- Secondary -->
+            <div class="button-demo">
+                <h3>Secondary Button</h3>
+                <p>Alternative actions with blue glow</p>
+                <div class="button-preview">
+                    <button class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i></button>
+                    <code>&lt;button class="btn btn-secondary"&gt;
+  &lt;i class="fas fa-times"&gt;&lt;/i&gt; Cancel
+&lt;/button&gt;</code>
+                </div>
+            </div>
+
+            <!-- Danger -->
+            <div class="button-demo">
+                <h3>Danger Button</h3>
+                <p>Destructive actions with red glow</p>
+                <div class="button-preview">
+                    <button class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i></button>
+                    <code>&lt;button class="btn btn-danger"&gt;
+  &lt;i class="fas fa-trash"&gt;&lt;/i&gt; Delete
+&lt;/button&gt;</code>
+                </div>
+            </div>
+
+            <!-- Ghost -->
+            <div class="button-demo">
+                <h3>Ghost Button</h3>
+                <p>Minimal style, slides right on hover</p>
+                <div class="button-preview">
+                    <button class="btn btn-ghost">
+                        <i class="fas fa-arrow-right"></i> Learn More
+                    </button>
+                </div>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i></button>
+                    <code>&lt;button class="btn btn-ghost"&gt;
+  &lt;i class="fas fa-arrow-right"&gt;&lt;/i&gt; Learn More
+&lt;/button&gt;</code>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SIZES -->
+    <div class="section">
+        <h2 class="section-title">Button Sizes</h2>
+        <div class="button-grid">
+            <div class="button-demo">
+                <h3>Small Button</h3>
+                <p>Compact size for secondary actions</p>
+                <div class="button-preview">
+                    <button class="btn btn-primary btn-sm">
+                        <i class="fas fa-check"></i> Save
+                    </button>
+                </div>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i></button>
+                    <code>&lt;button class="btn btn-primary btn-sm"&gt;
+  &lt;i class="fas fa-check"&gt;&lt;/i&gt; Save
+&lt;/button&gt;</code>
+                </div>
+            </div>
+
+            <div class="button-demo">
+                <h3>Medium Button (Default)</h3>
+                <p>Standard size for most actions</p>
+                <div class="button-preview">
+                    <button class="btn btn-primary btn-md">
+                        <i class="fas fa-check"></i> Save Changes
+                    </button>
+                </div>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i></button>
+                    <code>&lt;button class="btn btn-primary btn-md"&gt;
+  &lt;i class="fas fa-check"&gt;&lt;/i&gt; Save Changes
+&lt;/button&gt;</code>
+                </div>
+            </div>
+
+            <div class="button-demo">
+                <h3>Large Button</h3>
+                <p>Prominent size for primary CTAs</p>
+                <div class="button-preview">
+                    <button class="btn btn-primary btn-lg">
+                        <i class="fas fa-rocket"></i> Get Started
+                    </button>
+                </div>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i></button>
+                    <code>&lt;button class="btn btn-primary btn-lg"&gt;
+  &lt;i class="fas fa-rocket"&gt;&lt;/i&gt; Get Started
+&lt;/button&gt;</code>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SPECIAL BUTTONS -->
+    <div class="section">
+        <h2 class="section-title">Special Themed Buttons</h2>
+        <div class="button-grid">
+            <!-- Google Sign In -->
+            <div class="button-demo">
+                <h3>Google Sign In</h3>
+                <p>Animated cursor appears on hover</p>
+                <div class="button-preview">
+                    <button class="btn btn-google">
+                        <i class="fab fa-google"></i> Sign in with Google
+                    </button>
+                </div>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i></button>
+                    <code>&lt;button class="btn btn-google"&gt;
+  &lt;i class="fab fa-google"&gt;&lt;/i&gt; Sign in with Google
+&lt;/button&gt;</code>
+                </div>
+            </div>
+
+            <!-- Send to Kindle -->
+            <div class="button-demo">
+                <h3>Send to Kindle (Editor)</h3>
+                <p>Epic gradient with shimmer effect</p>
+                <div class="button-preview">
+                    <button id="send-button">
+                        <i class="fas fa-rocket"></i> Send to Kindle
+                    </button>
+                </div>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i></button>
+                    <code>&lt;button id="send-button"&gt;
+  &lt;i class="fas fa-rocket"&gt;&lt;/i&gt; Send to Kindle
+&lt;/button&gt;</code>
+                </div>
+            </div>
+
+            <!-- Kindle Dashboard -->
+            <div class="button-demo">
+                <h3>Send to Kindle (Dashboard)</h3>
+                <p>Full-width with pulsing icon</p>
+                <div class="button-preview">
+                    <button class="btn-send-kindle">
+                        <i class="fab fa-kindle"></i> Send This Book to Kindle
+                    </button>
+                </div>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i></button>
+                    <code>&lt;button class="btn-send-kindle"&gt;
+  &lt;i class="fab fa-kindle"&gt;&lt;/i&gt; Send This Book to Kindle
+&lt;/button&gt;</code>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DASHBOARD BUTTONS -->
+    <div class="section">
+        <h2 class="section-title">Dashboard Specific</h2>
+        <div class="button-grid">
+            <!-- New Book -->
+            <div class="button-demo">
+                <h3>New Book Button</h3>
+                <p>Full-width with rotating icon</p>
+                <div class="button-preview">
+                    <button class="btn-new-book">
+                        <i class="fas fa-plus"></i> New Book
+                    </button>
+                </div>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i></button>
+                    <code>&lt;button class="btn-new-book"&gt;
+  &lt;i class="fas fa-plus"&gt;&lt;/i&gt; New Book
+&lt;/button&gt;</code>
+                </div>
+            </div>
+
+            <!-- Download EPUB -->
+            <div class="button-demo">
+                <h3>Download EPUB</h3>
+                <p>Green glow with bottom border animation</p>
+                <div class="button-preview">
+                    <button class="btn-download-epub">
+                        <i class="fas fa-download"></i> Download EPUB
+                    </button>
+                </div>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i></button>
+                    <code>&lt;button class="btn-download-epub"&gt;
+  &lt;i class="fas fa-download"&gt;&lt;/i&gt; Download EPUB
+&lt;/button&gt;</code>
+                </div>
+            </div>
+
+            <!-- Download PDF -->
+            <div class="button-demo">
+                <h3>Download PDF</h3>
+                <p>Red glow with bottom border animation</p>
+                <div class="button-preview">
+                    <button class="btn-download-pdf">
+                        <i class="fas fa-file-pdf"></i> Download PDF
+                    </button>
+                </div>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i></button>
+                    <code>&lt;button class="btn-download-pdf"&gt;
+  &lt;i class="fas fa-file-pdf"&gt;&lt;/i&gt; Download PDF
+&lt;/button&gt;</code>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- STATES -->
+    <div class="section">
+        <h2 class="section-title">Button States</h2>
+        <div class="button-grid">
+            <div class="button-demo">
+                <h3>Disabled State</h3>
+                <p>50% opacity, no interaction</p>
+                <div class="button-preview">
+                    <button class="btn btn-primary" disabled>
+                        <i class="fas fa-lock"></i> Disabled
+                    </button>
+                </div>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i></button>
+                    <code>&lt;button class="btn btn-primary" disabled&gt;
+  &lt;i class="fas fa-lock"&gt;&lt;/i&gt; Disabled
+&lt;/button&gt;</code>
+                </div>
+            </div>
+
+            <div class="button-demo">
+                <h3>Loading State</h3>
+                <p>Spinner replaces content</p>
+                <div class="button-preview">
+                    <button class="btn btn-primary btn-loading">
+                        <i class="fas fa-spinner"></i> Loading...
+                    </button>
+                </div>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i></button>
+                    <code>&lt;button class="btn btn-primary btn-loading"&gt;
+  &lt;i class="fas fa-spinner"&gt;&lt;/i&gt; Loading...
+&lt;/button&gt;</code>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EFFECTS -->
+    <div class="section">
+        <h2 class="section-title">Effects Reference</h2>
+        <div class="note">
+            <p><strong>All buttons include these effects:</strong></p>
+            <ul style="margin-top: var(--space-sm); padding-left: var(--space-lg); color: var(--text-secondary); font-size: var(--font-size-sm);">
+                <li>✨ Ripple effect on click (material design inspired)</li>
+                <li>🎯 Icons scale 1.1x on hover</li>
+                <li>🌊 Smooth transitions (0.15s - 0.3s)</li>
+                <li>💫 Color-coded glows (green/blue/red)</li>
+                <li>⬆️ Lift animations (translateY)</li>
+                <li>🎨 Gradient shimmer effects on special buttons</li>
+                <li>♿ Proper focus states for accessibility</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- USAGE NOTES -->
+    <div class="section">
+        <h2 class="section-title">Usage Notes</h2>
+        <div class="note">
+            <p><strong>How to use these buttons in your project:</strong></p>
+            <ul style="margin-top: var(--space-sm); padding-left: var(--space-lg); color: var(--text-secondary); font-size: var(--font-size-sm); line-height: var(--line-height-relaxed);">
+                <li>1. Make sure you include the design system CSS files in your HTML</li>
+                <li>2. Copy the HTML code from any button above</li>
+                <li>3. All styles are already defined in <code style="color: var(--accent-secondary);">static/css/buttons.css</code></li>
+                <li>4. Mix and match variants and sizes as needed</li>
+                <li>5. Add Font Awesome icons for better visual feedback</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function copyCode(button) {
+            const codeBlock = button.parentElement;
+            const code = codeBlock.querySelector('code').textContent;
+
+            navigator.clipboard.writeText(code).then(() => {
+                button.innerHTML = '<i class="fas fa-check"></i>';
+                button.style.background = 'var(--accent-primary)';
+                button.style.color = 'var(--bg-primary)';
+
+                setTimeout(() => {
+                    button.innerHTML = '<i class="fas fa-copy"></i>';
+                    button.style.background = '';
+                    button.style.color = '';
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>
