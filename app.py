@@ -560,11 +560,12 @@ def oauth2callback():
 
     if not state:
         logger.error("No state in session!")
-        return """
-        <h1>Session Expired</h1>
-        <p>Your session expired. This can happen if you pressed the back button or took too long.</p>
-        <p><a href="/">Click here to sign in again</a></p>
-        """, 400
+        return render_template('error.html',
+            title='Session Expired',
+            message='Your session expired. This can happen if you pressed the back button or took too long.',
+            action_text='Sign in again',
+            action_url='/'
+        ), 400
 
     try:
         flow = Flow.from_client_config(
