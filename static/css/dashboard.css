@@ -33,16 +33,7 @@
     overflow: hidden;
 }
 
-.book-item::before {
-    content: ">";
-    position: absolute;
-    left: 0.85rem;
-    top: var(--space-md);
-    color: var(--text-dim);
-    font-size: var(--font-size-sm);
-    opacity: 0;
-    transition: all var(--transition-normal) var(--ease-standard);
-}
+/* Removed cluttered > cursor - hover effects are sufficient */
 
 .book-item::after {
     content: '';
@@ -61,11 +52,7 @@
     transform: translateX(3px) translateY(-1px);
 }
 
-.book-item:hover::before {
-    opacity: 1;
-    left: 0.5rem;
-    animation: blink 1.5s infinite;
-}
+/* Clean hover - no cursor needed */
 
 .book-item:hover::after {
     left: 100%;
@@ -77,12 +64,7 @@
     box-shadow: 0 0 15px rgba(63, 185, 80, 0.15);
 }
 
-.book-item.active::before {
-    opacity: 1;
-    color: var(--accent-primary);
-    left: 0.5rem;
-    animation: blink 1.5s infinite;
-}
+/* Clean active state - gradient background is enough */
 
 .book-item h3 {
     font-size: var(--font-size-base);
@@ -226,7 +208,27 @@
 
 .user-email {
     color: var(--text-secondary);
-    font-size: var(--font-size-md);
+    font-size: var(--font-size-sm);
+    padding: 0.4rem 0.85rem;
+    background: var(--bg-tertiary);
+    border: var(--border-width) solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    transition: all var(--transition-normal);
+    position: relative;
+}
+
+.user-email::before {
+    content: "$ ";
+    color: var(--accent-secondary);
+    font-weight: var(--font-weight-semibold);
+}
+
+.user-email:hover {
+    background: var(--bg-primary);
+    border-color: var(--accent-secondary);
+    color: var(--accent-secondary);
+    box-shadow: 0 0 10px rgba(88, 166, 255, 0.15);
+    transform: translateY(-1px);
 }
 
 /* Cover Image Upload */

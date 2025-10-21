@@ -30,13 +30,14 @@ body {
     margin-bottom: 5px;
     display: flex;
     align-items: center;
-    gap: var(--space-sm);
+    gap: 0.4rem;
 }
 
 #sidebar-header h1::before {
-    content: ">";
+    content: ">_";
     color: var(--accent-secondary);
-    animation: blink 1.5s infinite;
+    font-size: 1rem;
+    animation: terminalBlink 1.2s infinite;
 }
 
 #sidebar-header .subtitle {
@@ -44,6 +45,7 @@ body {
     color: var(--text-dim);
     font-weight: var(--font-weight-normal);
     letter-spacing: 1px;
+    padding-left: 1.4rem;
 }
 
 #sidebar-header a,
