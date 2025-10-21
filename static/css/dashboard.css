@@ -323,22 +323,4 @@
     border-color: var(--accent-danger);
 }
 
-/* Send to Kindle Button */
-.btn-send-kindle {
-    padding: var(--space-md) var(--space-xl);
-    background: var(--accent-secondary);
-    color: var(--bg-primary);
-    border: none;
-    border-radius: var(--border-radius-md);
-    font-weight: var(--font-weight-semibold);
-    font-size: var(--font-size-base);
-    cursor: pointer;
-    transition: all var(--transition-normal) var(--ease-standard);
-    margin-top: var(--space-xl);
-    font-family: var(--font-mono);
-}
-
-.btn-send-kindle:hover {
-    background: #6cb6ff;
-    box-shadow: 0 0 20px rgba(88, 166, 255, 0.3);
-}
+/* Send to Kindle Button - now defined in buttons.css */

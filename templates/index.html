@@ -1271,7 +1271,7 @@
                         sendButton.disabled = true;
                         updateStatus('Compiling and sending to Kindle...', 'saving');
 
-                        const response = await fetch('/api/send-to-kindle', { method: 'POST' });
+                        const response = await fetch(`/api/books/${encodeURIComponent(BOOK_NAME)}/send-to-kindle`, { method: 'POST' });
 
                         if (response.ok) {
                             updateStatus('Book successfully sent!', 'saved');

@@ -1180,14 +1180,14 @@ def api_send_to_kindle(book_name):
             return jsonify({'error': 'Not authenticated'}), 401
 
         # Get global settings for Kindle email
-        global_settings = dm.load_global_settings()
+        global_settings = dm.get_global_settings()
         kindle_email = global_settings.get('kindle_email')
 
         if not kindle_email:
             return jsonify({'error': 'Kindle email not configured. Please set it in Global Settings.'}), 400
 
         # Get book settings
-        book_settings = dm.load_book_settings(book_name)
+        book_settings = dm.get_book_settings(book_name)
         book_title = book_settings.get('title', book_name)
         cover_base64 = book_settings.get('cover')
 
