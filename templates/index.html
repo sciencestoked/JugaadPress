@@ -1319,19 +1319,7 @@
                 if (response.ok) {
                     const data = await response.json();
                     showToast('✓ Page created successfully!');
-
-                    // Optimistically add to page list (Drive API has delay)
-                    if (!state.allPages.includes(data.filename)) {
-                        state.allPages.push(data.filename);
-                    }
-
-                    // Load page list with retry for Drive API eventual consistency
-                    let retries = 3;
-                    for (let i = 0; i < retries; i++) {
-                        await loadPageList();
-                        if (state.allPages.includes(data.filename)) break;
-                        if (i < retries - 1) await new Promise(r => setTimeout(r, 1000)); // Wait 1s before retry
-                    }
+                    await loadPageList();
 
                     // Small delay for smoother transition
                     setTimeout(() => {
