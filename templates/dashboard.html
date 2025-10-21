@@ -114,7 +114,12 @@
                     <form onsubmit="saveBookSettings(event)">
                         <div class="form-group">
                             <label>Book Title</label>
-                            <input type="text" id="bookTitle" placeholder="My Amazing Book" required>
+                            <div style="display: flex; gap: var(--space-xs);">
+                                <input type="text" id="bookTitle" placeholder="My Amazing Book" required style="flex: 1;">
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="renameBook()" title="Rename book folder" style="white-space: nowrap;">
+                                    <i class="fas fa-edit"></i> Rename
+                                </button>
+                            </div>
                             <small>Title that appears on your Kindle</small>
                         </div>
 
@@ -543,6 +548,52 @@
                     showToast('✗ Error creating book', 'error');
                 }
             });
+        }
+
+        async function renameBook() {
+            if (!selectedBook) return;
+
+            showInputModal(async (newName) => {
+                if (newName === selectedBook) {
+                    showToast('Name unchanged', 'error');
+                    return;
+                }
+
+                try {
+                    showLoading('Renaming book...');
+                    const response = await fetch(`/api/books/${encodeURIComponent(selectedBook)}/rename`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ new_name: newName })
+                    });
+
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.error || 'Failed to rename');
+                    }
+
+                    const oldName = selectedBook;
+                    selectedBook = newName;
+
+                    await loadBooks();
+                    await loadBookSettings(newName);
+
+                    document.getElementById('selectedBookName').textContent = newName;
+                    hideLoading();
+                    showToast(`✓ Renamed "${oldName}" to "${newName}"`, 'success');
+                } catch (error) {
+                    hideLoading();
+                    console.error('Failed to rename book:', error);
+                    showToast(`✗ ${error.message}`, 'error');
+                }
+            });
+
+            // Pre-fill with current name
+            setTimeout(() => {
+                const input = document.getElementById('input-modal-input');
+                input.value = selectedBook;
+                input.select();
+            }, 100);
         }
 
         async function deleteBook(bookName) {

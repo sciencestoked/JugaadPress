@@ -209,6 +209,24 @@ class DriveManager:
 
         return True
 
+    def rename_book(self, old_name, new_name):
+        """Rename a book folder"""
+        book_id = self._get_book_id(old_name)
+        if not book_id:
+            return False
+
+        # Check if new name already exists
+        if self._get_book_id(new_name):
+            return False
+
+        self.service.files().update(
+            fileId=book_id,
+            body={'name': new_name}
+        ).execute()
+
+        logger.info(f"Renamed book: {old_name} -> {new_name}")
+        return True
+
     def _get_book_id(self, book_name):
         """Get folder ID for a book"""
         query = f"name='{book_name}' and '{self.root_folder_id}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false"
@@ -683,6 +701,33 @@ def api_create_book():
     except Exception as e:
         logger.error(f"Error creating book: {e}")
         return jsonify({'error': 'Failed to create book in Drive'}), 500
+
+
+@app.route('/api/books/<book_name>/rename', methods=['POST'])
+@login_required
+def api_rename_book(book_name):
+    """Rename a book"""
+    try:
+        data = request.get_json()
+        new_name = data.get('new_name')
+
+        if not new_name or not new_name.strip():
+            return jsonify({'error': 'New book name required'}), 400
+
+        dm = get_drive_manager()
+        if not dm:
+            return jsonify({'error': 'Not authenticated'}), 401
+
+        logger.info(f"Renaming book: {book_name} -> {new_name}")
+        success = dm.rename_book(book_name, new_name.strip())
+
+        if success:
+            return jsonify({'success': True, 'new_name': new_name.strip()}), 200
+        else:
+            return jsonify({'error': 'Failed to rename book (may already exist)'}), 400
+    except Exception as e:
+        logger.error(f"Error renaming book: {e}")
+        return jsonify({'error': 'Failed to rename book'}), 500
 
 
 @app.route('/api/books/<book_name>', methods=['DELETE'])
