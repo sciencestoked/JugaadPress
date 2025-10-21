@@ -112,27 +112,27 @@
     </div>
 
     <!-- MODAL (CONFIRMATION) -->
-    <div id="modal-overlay">
-        <div id="modal">
-            <h2 id="modal-title">Confirm Action</h2>
-            <p id="modal-message">Are you sure?</p>
-            <div id="modal-actions">
-                <button id="modal-cancel">Cancel</button>
-                <button id="modal-confirm" class="primary">Confirm</button>
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal">
+            <h2 class="modal-header" id="modal-title">Confirm Action</h2>
+            <p class="modal-body" id="modal-message">Are you sure?</p>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="modal-cancel">Cancel</button>
+                <button class="btn btn-primary" id="modal-confirm">Confirm</button>
             </div>
         </div>
     </div>
 
     <!-- LOADING OVERLAY -->
-    <div id="loadingOverlay" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(13, 17, 23, 0.95); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 10000; backdrop-filter: blur(4px);">
-        <div style="width: 50px; height: 50px; border: 3px solid var(--border-color); border-top: 3px solid var(--accent-primary); border-radius: 50%; animation: spin 1s linear infinite;"></div>
-        <div id="loadingText" style="margin-top: 1.5rem; color: var(--text-secondary); font-size: 0.9rem; letter-spacing: 1px;">Loading editor...</div>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <div class="loading-text" id="loadingText">Loading editor...</div>
     </div>
 
     <!-- TOAST NOTIFICATION -->
-    <div id="toast">
-        <i class="fa-solid fa-circle-check"></i>
-        <span id="toast-message">Action completed!</span>
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">Action completed!</span>
     </div>
 
     <!-- INPUT MODAL (FOR NEW PAGE) -->
@@ -237,17 +237,17 @@
             const overlay = document.getElementById('loadingOverlay');
             const text = document.getElementById('loadingText');
             text.textContent = message;
-            overlay.style.display = 'flex';
+            overlay.classList.add('show');
         }
 
         function hideLoading() {
             const overlay = document.getElementById('loadingOverlay');
-            overlay.style.display = 'none';
+            overlay.classList.remove('show');
         }
 
         function showToast(message, isError = false) {
             const toastEl = document.getElementById('toast');
-            const toastMessage = document.getElementById('toast-message');
+            const toastMessage = document.getElementById('toastMessage');
             toastMessage.textContent = message;
             toastEl.classList.toggle('error', isError);
             toastEl.classList.add('show');
