@@ -34,10 +34,17 @@ body {
 }
 
 #sidebar-header h1::before {
-    content: ">_";
+    content: "> ";
+    color: var(--accent-secondary);
+    font-size: 1rem;
+}
+
+#sidebar-header h1::after {
+    content: "_";
     color: var(--accent-secondary);
     font-size: 1rem;
     animation: terminalBlink 1.2s infinite;
+    margin-left: -0.15rem;
 }
 
 #sidebar-header .subtitle {

@@ -27,10 +27,17 @@
 }
 
 .logo > div:first-child::before {
-    content: ">_";
+    content: "> ";
+    color: var(--accent-secondary);
+    font-size: 1.1rem;
+}
+
+.logo > div:first-child::after {
+    content: "_";
     color: var(--accent-secondary);
     font-size: 1.1rem;
     animation: terminalBlink 1.2s infinite;
+    margin-left: -0.1rem;
 }
 
 @keyframes terminalBlink {
@@ -421,8 +428,15 @@
 }
 
 .panel-title::before {
-    content: ">_";
+    content: "> ";
+    color: var(--accent-secondary);
+    font-size: 0.85rem;
+}
+
+.panel-title::after {
+    content: "_";
     color: var(--accent-secondary);
     font-size: 0.85rem;
     animation: terminalBlink 1.2s infinite;
+    margin-left: -0.35rem;
 }
