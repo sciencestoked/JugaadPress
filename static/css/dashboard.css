@@ -1,0 +1,276 @@
+/* ===== DASHBOARD SPECIFIC STYLES ===== */
+
+/* Main Container */
+.container {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 0;
+    flex: 1;
+    height: calc(100vh - 65px);
+}
+
+/* Left Panel - Books */
+.books-panel {
+    background: var(--bg-secondary);
+    border-right: var(--border-width) solid var(--border-color);
+    overflow-y: auto;
+    padding: var(--space-lg);
+}
+
+.book-list {
+    list-style: none;
+}
+
+.book-item {
+    background: var(--bg-tertiary);
+    border: var(--border-width) solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    padding: var(--space-md);
+    margin-bottom: 0.75rem;
+    cursor: pointer;
+    transition: all var(--transition-normal) var(--ease-standard);
+    position: relative;
+}
+
+.book-item::before {
+    content: ">";
+    position: absolute;
+    left: 0.85rem;
+    top: var(--space-md);
+    color: var(--text-dim);
+    font-size: var(--font-size-sm);
+    opacity: 0;
+    transition: all var(--transition-normal) var(--ease-standard);
+}
+
+.book-item:hover {
+    border-color: var(--accent-primary);
+    box-shadow: var(--glow-md);
+    transform: translateX(2px);
+}
+
+.book-item:hover::before {
+    opacity: 1;
+    left: 0.5rem;
+}
+
+.book-item.active {
+    border-color: var(--accent-primary);
+    background: rgba(63, 185, 80, 0.05);
+}
+
+.book-item.active::before {
+    opacity: 1;
+    color: var(--accent-primary);
+    left: 0.5rem;
+}
+
+.book-item h3 {
+    font-size: var(--font-size-base);
+    margin-bottom: var(--space-xs);
+    color: var(--text-primary);
+}
+
+.book-meta {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+}
+
+.book-actions {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+.btn-new-book {
+    width: 100%;
+    padding: var(--space-md);
+    background: var(--bg-tertiary);
+    border: var(--border-width) solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    transition: all var(--transition-normal) var(--ease-standard);
+    margin-top: var(--space-sm);
+    font-family: var(--font-mono);
+}
+
+.btn-new-book:hover {
+    border-color: var(--accent-primary);
+    background: var(--accent-primary);
+    color: var(--bg-primary);
+    box-shadow: var(--glow-md);
+    transform: translateY(-1px);
+}
+
+/* Right Panel - Settings */
+.settings-panel {
+    background: var(--bg-primary);
+    overflow-y: auto;
+    padding: var(--space-xl);
+}
+
+/* Tabs */
+.tabs {
+    display: flex;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-xl);
+    border-bottom: 2px solid var(--border-color);
+}
+
+.tab {
+    padding: 0.75rem var(--space-lg);
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all var(--transition-normal) var(--ease-standard);
+    font-family: var(--font-mono);
+}
+
+.tab:hover {
+    color: var(--text-primary);
+}
+
+.tab.active {
+    color: var(--accent-primary);
+    border-bottom-color: var(--accent-primary);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* User Menu */
+.user-menu {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.user-email {
+    color: var(--text-secondary);
+    font-size: var(--font-size-md);
+}
+
+/* Cover Image Upload */
+#coverPreview {
+    margin-bottom: var(--space-sm);
+    position: relative;
+}
+
+#coverImage {
+    max-width: 200px;
+    max-height: 300px;
+    border: var(--border-width) solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    display: block;
+}
+
+#deleteCoverBtn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: var(--accent-danger);
+    border: none;
+    color: white;
+    border-radius: var(--border-radius-full);
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-normal) var(--ease-standard);
+    box-shadow: var(--shadow-sm);
+}
+
+#deleteCoverBtn:hover {
+    transform: scale(1.1);
+    background: #ff6b6b;
+}
+
+#coverUploadLabel {
+    display: inline-block;
+    padding: var(--space-sm) var(--space-md);
+    background: var(--bg-tertiary);
+    border: var(--border-width) solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    color: var(--text-primary);
+    transition: all var(--transition-normal) var(--ease-standard);
+    margin-bottom: var(--space-sm);
+    font-size: var(--font-size-sm);
+}
+
+#coverUploadLabel:hover {
+    background: var(--accent-primary);
+    color: var(--bg-primary);
+    border-color: var(--accent-primary);
+}
+
+#coverLoading {
+    color: var(--text-secondary);
+    margin-bottom: var(--space-sm);
+}
+
+/* Download Buttons */
+.btn-download-epub,
+.btn-download-pdf {
+    padding: 0.75rem var(--space-lg);
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: var(--border-width) solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-md);
+    cursor: pointer;
+    transition: all var(--transition-normal) var(--ease-standard);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    font-family: var(--font-mono);
+}
+
+.btn-download-epub:hover {
+    background: var(--accent-primary);
+    color: var(--bg-primary);
+    border-color: var(--accent-primary);
+}
+
+.btn-download-pdf:hover {
+    background: var(--accent-danger);
+    color: white;
+    border-color: var(--accent-danger);
+}
+
+/* Send to Kindle Button */
+.btn-send-kindle {
+    padding: var(--space-md) var(--space-xl);
+    background: var(--accent-secondary);
+    color: var(--bg-primary);
+    border: none;
+    border-radius: var(--border-radius-md);
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-base);
+    cursor: pointer;
+    transition: all var(--transition-normal) var(--ease-standard);
+    margin-top: var(--space-xl);
+    font-family: var(--font-mono);
+}
+
+.btn-send-kindle:hover {
+    background: #6cb6ff;
+    box-shadow: 0 0 20px rgba(88, 166, 255, 0.3);
+}

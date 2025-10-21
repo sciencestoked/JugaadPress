@@ -8,33 +8,592 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-
-    <!-- Design System -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/variables.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/animations.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
-
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-primary);
+        }
+
+        /* Text Selection */
+        ::selection {
+            background-color: var(--accent-primary);
+            color: var(--bg-primary);
+        }
+
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --accent-primary: #3fb950;
+            --accent-secondary: #58a6ff;
+            --accent-danger: #f85149;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-dim: #6e7681;
+            --border-color: #30363d;
+        }
+
         body {
+            font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', Monaco, 'Cascadia Code', monospace;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
+        }
+
+        /* Header */
+        header {
+            padding: 1rem 2rem;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .logo #appTitle {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--accent-primary);
+            text-shadow: 0 0 10px rgba(63, 185, 80, 0.3);
+        }
+
+        .logo #appTitle::before {
+            content: ">";
+            color: var(--accent-secondary);
+            margin-right: 0.5rem;
+            animation: blink 1.5s infinite;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-email {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .btn-logout {
+            padding: 0.5rem 1rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-logout:hover {
+            background: var(--accent-danger);
+            border-color: var(--accent-danger);
+        }
+
+        /* Main Container */
+        .container {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 0;
+            flex: 1;
+            height: calc(100vh - 65px);
+        }
+
+        /* Left Panel - Books */
+        .books-panel {
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+
+        .panel-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            margin-bottom: 1rem;
+            letter-spacing: 1px;
+        }
+
+        .panel-title::before {
+            content: ">";
+            color: var(--accent-secondary);
+            margin-right: 0.5rem;
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0; }
+        }
+
+        .book-list {
+            list-style: none;
+        }
+
+        .book-item {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .book-item::before {
+            content: ">";
+            position: absolute;
+            left: 0.85rem;
+            top: 1rem;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            opacity: 0;
+            transition: all 0.2s;
+        }
+
+        .book-item:hover {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 20px rgba(63, 185, 80, 0.15);
+            transform: translateX(2px);
+        }
+
+        .book-item:hover::before {
+            opacity: 1;
+            left: 0.5rem;
+        }
+
+        .book-item.active {
+            border-color: var(--accent-primary);
+            background: rgba(63, 185, 80, 0.05);
+        }
+
+        .book-item.active::before {
+            opacity: 1;
+            color: var(--accent-primary);
+            left: 0.5rem;
+        }
+
+        .book-item h3 {
+            font-size: 1rem;
+            margin-bottom: 0.3rem;
+            color: var(--text-primary);
+        }
+
+        .book-meta {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+        }
+
+        .book-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.4rem 0.8rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+        }
+
+        .btn-primary:hover {
+            background: #4ac959;
+        }
+
+        .btn-secondary {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent-secondary);
+            color: var(--accent-secondary);
+        }
+
+        .btn-danger {
+            background: transparent;
+            color: var(--accent-danger);
+            border: 1px solid var(--accent-danger);
+        }
+
+        .btn-danger:hover {
+            background: var(--accent-danger);
+            color: var(--bg-primary);
+        }
+
+        .btn-new-book {
+            width: 100%;
+            padding: 1rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            margin-top: 0.5rem;
+        }
+
+        .btn-new-book:hover {
+            border-color: var(--accent-primary);
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+            box-shadow: 0 0 20px rgba(63, 185, 80, 0.2);
+            transform: translateY(-1px);
+        }
+
+        /* Right Panel - Settings */
+        .settings-panel {
+            background: var(--bg-primary);
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+        }
+
+        .tab:hover {
+            color: var(--text-primary);
+        }
+
+        .tab.active {
+            color: var(--accent-primary);
+            border-bottom-color: var(--accent-primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-family: 'JetBrains Mono', monospace;
+            transition: all 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 10px rgba(63, 185, 80, 0.15);
+            background: var(--bg-tertiary);
+        }
+
+        .form-group small {
+            display: block;
+            margin-top: 0.3rem;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+        }
+
+        .btn-save {
+            padding: 0.75rem 1.5rem;
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-save:hover {
+            background: #4ac959;
+            box-shadow: 0 0 20px rgba(63, 185, 80, 0.3);
+        }
+
+        .btn-send-kindle {
+            padding: 1rem 2rem;
+            background: var(--accent-secondary);
+            color: var(--bg-primary);
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 2rem;
+        }
+
+        .btn-send-kindle:hover {
+            background: #6cb6ff;
+            box-shadow: 0 0 20px rgba(88, 166, 255, 0.3);
+        }
+
+        .btn-download-epub, .btn-download-pdf {
+            padding: 0.75rem 1.5rem;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-download-epub:hover {
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+            border-color: var(--accent-primary);
+        }
+
+        .btn-download-pdf:hover {
+            background: var(--accent-danger);
+            color: white;
+            border-color: var(--accent-danger);
+        }
+
+        #deleteCoverBtn:hover {
+            transform: scale(1.1);
+            background: #ff6b6b;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--text-dim);
+        }
+
+        .section-title {
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .section-title::before {
+            content: "$";
+            color: var(--accent-secondary);
+            font-size: 1.1rem;
+            margin-right: 0.25rem;
+        }
+
+        .section-title i {
+            color: var(--accent-primary);
+            font-size: 0.85rem;
+        }
+
+        #coverUploadLabel:hover {
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+            border-color: var(--accent-primary);
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(13, 17, 23, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            backdrop-filter: blur(4px);
+        }
+
+        .loading-overlay.hidden {
+            display: none;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border-color);
+            border-top: 4px solid var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 1rem;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem 1.5rem;
+            min-width: 300px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transform: translateY(150%);
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 10000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--accent-primary);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--accent-danger);
+        }
+
+        .toast-content {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .toast-icon {
+            font-size: 1.2rem;
+        }
+
+        .toast.success .toast-icon {
+            color: var(--accent-primary);
+        }
+
+        .toast.error .toast-icon {
+            color: var(--accent-danger);
+        }
+
+        /* Loading state for buttons */
+        .btn.loading {
+            position: relative;
+            color: transparent;
+            pointer-events: none;
+        }
+
+        .btn.loading::after {
+            content: "";
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 50%;
+            left: 50%;
+            margin-left: -8px;
+            margin-top: -8px;
+            border: 2px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            color: white;
         }
     </style>
 </head>
 <body>
-    <header class="header">
+    <header>
         <div class="logo">
             <div id="appTitle">JugaadPress</div>
-            <div id="userSubtitle" class="logo-subtitle">// HACKER'S NOTEBOOK</div>
+            <div id="userSubtitle" style="font-size: 0.7rem; font-weight: 400; color: var(--text-dim); letter-spacing: 1px; margin-top: 0.2rem;">// HACKER'S NOTEBOOK</div>
         </div>
         <div class="user-menu">
             <span class="user-email" id="userEmail">Loading...</span>
-            <button class="btn btn-secondary btn-sm" onclick="logout()">
+            <button class="btn-logout" onclick="logout()">
                 <i class="fas fa-sign-out-alt"></i> Sign Out
             </button>
         </div>
@@ -84,7 +643,7 @@
                         <label>Gmail App Password</label>
                         <input type="password" id="senderPassword" placeholder="xxxx-xxxx-xxxx-xxxx" required>
                         <small>
-                            <a href="https://support.google.com/accounts/answer/185833" target="_blank">
+                            <a href="https://support.google.com/accounts/answer/185833" target="_blank" style="color: var(--accent-secondary);">
                                 Get App Password
                             </a> (requires 2FA enabled)
                         </small>
@@ -95,13 +654,13 @@
                         <input type="email" id="kindleEmail" placeholder="your-kindle@kindle.com" required>
                         <small>
                             Find at
-                            <a href="https://www.amazon.com/hz/mycd/myx#/home/settings/payment" target="_blank">
+                            <a href="https://www.amazon.com/hz/mycd/myx#/home/settings/payment" target="_blank" style="color: var(--accent-secondary);">
                                 Amazon Kindle Settings
                             </a>
                         </small>
                     </div>
 
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn-save">
                         <i class="fas fa-save"></i> Save Global Settings
                     </button>
                 </form>
@@ -128,27 +687,27 @@
 
                         <div class="form-group">
                             <label>Cover Image (optional)</label>
-                            <div id="coverPreview" style="display: none;">
-                                <img id="coverImage">
-                                <button type="button" id="deleteCoverBtn" onclick="deleteCoverImage()">
+                            <div id="coverPreview" style="margin-bottom: 10px; display: none; position: relative;">
+                                <img id="coverImage" style="max-width: 200px; max-height: 300px; border: 1px solid var(--border-color); border-radius: 4px; display: block;">
+                                <button type="button" id="deleteCoverBtn" onclick="deleteCoverImage()" style="position: absolute; top: 5px; right: 5px; background: var(--accent-danger); border: none; color: white; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
-                            <div id="coverLoading" style="display: none;">
+                            <div id="coverLoading" style="display: none; color: var(--text-secondary); margin-bottom: 10px;">
                                 <i class="fas fa-spinner fa-spin"></i> Loading cover image...
                             </div>
-                            <label for="bookCover" id="coverUploadLabel">
+                            <label for="bookCover" id="coverUploadLabel" style="display: inline-block; padding: 0.5rem 1rem; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; color: var(--text-primary); transition: all 0.2s; margin-bottom: 0.5rem;">
                                 <i class="fas fa-upload"></i> <span id="coverUploadText">Upload Cover Image</span>
                             </label>
                             <input type="file" id="bookCover" accept="image/*" onchange="previewCoverImage(event)" style="display: none;">
-                            <small style="display: block; margin-top: var(--space-sm);">Recommended: 1600x2560px, JPG format</small>
+                            <small style="display: block; margin-top: 0.5rem;">Recommended: 1600x2560px, JPG format</small>
                         </div>
 
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn-save">
                             <i class="fas fa-save"></i> Save Book Settings
                         </button>
 
-                        <div style="display: flex; gap: var(--space-sm); flex-wrap: wrap; margin-top: var(--space-md);">
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem;">
                             <button type="button" class="btn-download-epub" onclick="downloadBook('epub')" style="flex: 1; min-width: 200px;">
                                 <i class="fas fa-download"></i> Download EPUB
                             </button>
@@ -174,30 +733,82 @@
 
     <!-- Toast Container -->
     <div class="toast" id="toast">
-        <i class="fas fa-check-circle"></i>
-        <span id="toastMessage">Success!</span>
-    </div>
-
-    <!-- Modal -->
-    <div class="modal-overlay" id="modal-overlay">
-        <div class="modal">
-            <h2 class="modal-header" id="modal-title">Confirm Action</h2>
-            <p class="modal-body" id="modal-message">Are you sure?</p>
-            <div class="modal-actions">
-                <button class="btn btn-secondary" id="modal-cancel">Cancel</button>
-                <button class="btn btn-primary" id="modal-confirm">Confirm</button>
-            </div>
+        <div class="toast-content">
+            <i class="toast-icon fas fa-check-circle"></i>
+            <span id="toastMessage">Success!</span>
         </div>
     </div>
 
-    <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
     <script>
         // State
         let selectedBook = null;
         let books = [];
         let globalSettings = {};
 
+        // ===== UTILITY FUNCTIONS =====
+
+        function showLoading(message = 'Loading...') {
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            document.getElementById('loadingText').textContent = message;
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.add('hidden');
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            const toastIcon = toast.querySelector('.toast-icon');
+
+            // Set message
+            toastMessage.textContent = message;
+
+            // Set icon
+            if (type === 'success') {
+                toastIcon.className = 'toast-icon fas fa-check-circle';
+                toast.className = 'toast success';
+            } else {
+                toastIcon.className = 'toast-icon fas fa-exclamation-circle';
+                toast.className = 'toast error';
+            }
+
+            // Show toast
+            setTimeout(() => toast.classList.add('show'), 100);
+
+            // Hide after 3 seconds
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        async function apiCall(url, options = {}, retries = 3) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, {
+                        ...options,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...options.headers
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+
+                    return await response.json();
+                } catch (error) {
+                    console.error(`API call failed (attempt ${i + 1}/${retries}):`, error);
+                    if (i === retries - 1) throw error;
+                    // Wait before retry (exponential backoff)
+                    await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
+                }
+            }
+        }
+
         // ===== LOAD INITIAL DATA =====
+
         async function loadDashboard() {
             try {
                 showLoading('Loading dashboard...');
@@ -257,17 +868,17 @@
             }
 
             bookList.innerHTML = books.map(book => `
-                <li class="book-item ${selectedBook === book.name ? 'active' : ''}" onclick="selectBook('${book.name.replace(/'/g, "\\'")}')">
+                <li class="book-item ${selectedBook === book.name ? 'active' : ''}" onclick="selectBook('${book.name}')">
                     <h3><i class="fas fa-book"></i> ${book.name}</h3>
                     <div class="book-meta">
                         ${book.pageCount} pages
                         ${book.lastModified ? '• Updated ' + formatDate(book.lastModified) : ''}
                     </div>
                     <div class="book-actions">
-                        <button class="btn btn-primary btn-sm" onclick="editBook('${book.name.replace(/'/g, "\\'")}'); event.stopPropagation();">
+                        <button class="btn btn-primary" onclick="editBook('${book.name}'); event.stopPropagation();">
                             <i class="fas fa-edit"></i> Edit
                         </button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteBook('${book.name.replace(/'/g, "\\'")}'); event.stopPropagation();">
+                        <button class="btn btn-danger" onclick="deleteBook('${book.name}'); event.stopPropagation();">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
@@ -328,7 +939,7 @@
                 // Show cover if exists
                 coverLoading.style.display = 'none';
                 if (settings.cover) {
-                    coverImage.src = settings.cover;
+                    coverImage.src = settings.cover; // base64 data URL
                     coverPreview.style.display = 'block';
                     coverUploadText.innerHTML = '<i class="fas fa-sync-alt"></i> Replace Cover Image';
                 } else {
@@ -367,6 +978,7 @@
             try {
                 showLoading('Removing cover image...');
 
+                // Save settings with empty cover
                 await fetch(`/api/books/${encodeURIComponent(selectedBook)}/settings`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -426,9 +1038,10 @@
             // Handle cover image if uploaded
             const coverFile = document.getElementById('bookCover').files[0];
             if (coverFile) {
+                // Convert to base64 for storage in Drive
                 const reader = new FileReader();
                 reader.onloadend = async function() {
-                    settings.cover = reader.result;
+                    settings.cover = reader.result; // base64 string
                     await saveSettingsToDrive(settings);
                 };
                 reader.readAsDataURL(coverFile);
@@ -445,7 +1058,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(settings)
                 });
-                await loadBooks();
+                await loadBooks(); // Refresh book list
                 hideLoading();
                 showToast('✓ Book settings saved to Drive!', 'success');
             } catch (error) {
@@ -543,7 +1156,10 @@
                     throw new Error(error.error || 'Failed to generate book');
                 }
 
+                // Get the blob
                 const blob = await response.blob();
+
+                // Create download link
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
@@ -563,20 +1179,35 @@
         }
 
         function switchTab(tab) {
+            // Update tab buttons
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
 
+            // Determine which tab was clicked
             if (tab === 'global') {
                 document.querySelector('.tab:nth-child(1)').classList.add('active');
             } else {
                 document.querySelector('.tab:nth-child(2)').classList.add('active');
             }
 
+            // Update tab content
             document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
             document.getElementById(tab === 'global' ? 'globalSettings' : 'bookSettings').classList.add('active');
         }
 
         function logout() {
             window.location.href = '/logout';
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diff = now - date;
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+            if (days === 0) return 'today';
+            if (days === 1) return 'yesterday';
+            if (days < 7) return `${days} days ago`;
+            return date.toLocaleDateString();
         }
 
         // Initialize
