@@ -1,18 +1,25 @@
 # Python
 __pycache__/
 *.pyc
+*.pyo
 venv/
 jugaadpressenv/
 
-# Secrets
+# Secrets & OAuth
 config.py
 client_secret.json
 credentials.json
 token.json
+secret_key.txt
 
 # Generated files
 *.epub
-test_undo.html
+*.pdf
 
 # macOS
 .DS_Store
+
+# Old files (migrated to Drive)
+pages/
+cover.jpg
+_archive/
