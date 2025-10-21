@@ -356,8 +356,14 @@ class DriveManager:
             if not book_id:
                 return None
 
+            # Ensure filename has .md extension
+            if not filename.endswith('.md'):
+                filename_with_ext = f"{filename}.md"
+            else:
+                filename_with_ext = filename
+
             # Find file
-            query = f"name='{filename}' and '{book_id}' in parents and trashed=false"
+            query = f"name='{filename_with_ext}' and '{book_id}' in parents and trashed=false"
             results = self.service.files().list(
                 q=query,
                 spaces='drive',
@@ -395,6 +401,12 @@ class DriveManager:
             if not book_id:
                 return False
 
+            # Ensure filename has .md extension
+            if not filename.endswith('.md'):
+                filename_with_ext = f"{filename}.md"
+            else:
+                filename_with_ext = filename
+
             media = MediaIoBaseUpload(
                 BytesIO(content.encode('utf-8')),
                 mimetype='text/markdown',
@@ -402,7 +414,7 @@ class DriveManager:
             )
 
             # Check if file exists
-            query = f"name='{filename}' and '{book_id}' in parents and trashed=false"
+            query = f"name='{filename_with_ext}' and '{book_id}' in parents and trashed=false"
             results = self.service.files().list(
                 q=query,
                 spaces='drive',
@@ -417,11 +429,11 @@ class DriveManager:
                     fileId=files[0]['id'],
                     media_body=media
                 ).execute()
-                logger.info(f"Updated existing page: {filename}")
+                logger.info(f"Updated existing page: {filename_with_ext}")
             else:
                 # Create new
                 file_metadata = {
-                    'name': filename,
+                    'name': filename_with_ext,
                     'parents': [book_id],
                     'mimeType': 'text/markdown'
                 }
@@ -430,7 +442,7 @@ class DriveManager:
                     media_body=media,
                     fields='id'
                 ).execute()
-                logger.info(f"Created new page: {filename}")
+                logger.info(f"Created new page: {filename_with_ext}")
 
             return True
 
@@ -443,8 +455,14 @@ class DriveManager:
             if not book_id:
                 return False
 
+            # Ensure filename has .md extension
+            if not filename.endswith('.md'):
+                filename_with_ext = f"{filename}.md"
+            else:
+                filename_with_ext = filename
+
             # Find file
-            query = f"name='{filename}' and '{book_id}' in parents and trashed=false"
+            query = f"name='{filename_with_ext}' and '{book_id}' in parents and trashed=false"
             results = self.service.files().list(
                 q=query,
                 spaces='drive',
