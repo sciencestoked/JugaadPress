@@ -48,7 +48,8 @@ SCOPES = [
     'openid',
     'https://www.googleapis.com/auth/userinfo.email',
     'https://www.googleapis.com/auth/userinfo.profile',
-    'https://www.googleapis.com/auth/drive.file'
+    'https://www.googleapis.com/auth/drive.file',
+    'https://www.googleapis.com/auth/gmail.send'  # For sending emails via Gmail API
 ]
 
 CLIENT_SECRETS_FILE = "client_secret.json"
@@ -1161,6 +1162,88 @@ def generate_pdf(dm, book_name, book_title, pages, cover_base64=None):
         # If reportlab is not installed, return error
         logger.error("reportlab not installed - cannot generate PDF")
         raise Exception("PDF generation requires reportlab library. Please install it: pip install reportlab")
+
+
+@app.route('/api/books/<book_name>/send-to-kindle', methods=['POST'])
+@login_required
+def api_send_to_kindle(book_name):
+    """Send book to Kindle using Gmail API (no app password needed!)"""
+    try:
+        import base64
+        from email.mime.multipart import MIMEMultipart
+        from email.mime.text import MIMEText
+        from email.mime.application import MIMEApplication
+
+        # Get Drive Manager
+        dm = get_drive_manager()
+        if not dm:
+            return jsonify({'error': 'Not authenticated'}), 401
+
+        # Get global settings for Kindle email
+        global_settings = dm.load_global_settings()
+        kindle_email = global_settings.get('kindle_email')
+
+        if not kindle_email:
+            return jsonify({'error': 'Kindle email not configured. Please set it in Global Settings.'}), 400
+
+        # Get book settings
+        book_settings = dm.load_book_settings(book_name)
+        book_title = book_settings.get('title', book_name)
+        cover_base64 = book_settings.get('cover')
+
+        # Get pages
+        pages = dm.list_pages(book_name)
+
+        # Generate EPUB
+        logger.info(f"Generating EPUB for {book_name}")
+        epub_content = generate_epub(dm, book_name, book_title, pages, cover_base64)
+
+        # Create email message using Gmail API
+        credentials = Credentials(
+            token=session['credentials']['token'],
+            refresh_token=session['credentials']['refresh_token'],
+            token_uri=session['credentials']['token_uri'],
+            client_id=session['credentials']['client_id'],
+            client_secret=session['credentials']['client_secret'],
+            scopes=session['credentials']['scopes']
+        )
+
+        gmail_service = build('gmail', 'v1', credentials=credentials)
+
+        # Create email
+        message = MIMEMultipart()
+        message['To'] = kindle_email
+        message['Subject'] = book_title
+
+        # Email body
+        body = f"Your book '{book_title}' from JugaadPress"
+        message.attach(MIMEText(body, 'plain'))
+
+        # Attach EPUB
+        epub_attachment = MIMEApplication(epub_content, _subtype='epub+zip')
+        epub_attachment.add_header('Content-Disposition', 'attachment', filename=f'{book_name}.epub')
+        message.attach(epub_attachment)
+
+        # Encode message
+        raw_message = base64.urlsafe_b64encode(message.as_bytes()).decode('utf-8')
+
+        # Send via Gmail API
+        gmail_service.users().messages().send(
+            userId='me',
+            body={'raw': raw_message}
+        ).execute()
+
+        logger.info(f"Successfully sent {book_name} to {kindle_email}")
+        return jsonify({'success': True, 'message': f'Book sent to {kindle_email}'}), 200
+
+    except HttpError as e:
+        logger.error(f"Gmail API error: {e}")
+        if e.resp.status == 403:
+            return jsonify({'error': 'Gmail API not enabled. Please re-authenticate to grant Gmail permissions.'}), 403
+        return jsonify({'error': f'Failed to send email: {str(e)}'}), 500
+    except Exception as e:
+        logger.error(f"Error sending to Kindle: {e}")
+        return jsonify({'error': f'Failed to send to Kindle: {str(e)}'}), 500
 
 
 if __name__ == '__main__':

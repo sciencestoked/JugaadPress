@@ -75,22 +75,6 @@
 
                 <form onsubmit="saveGlobalSettings(event)">
                     <div class="form-group">
-                        <label>Sender Email (Gmail)</label>
-                        <input type="email" id="senderEmail" placeholder="your-email@gmail.com" required>
-                        <small>The Gmail account used to send books to Kindle</small>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Gmail App Password</label>
-                        <input type="password" id="senderPassword" placeholder="xxxx-xxxx-xxxx-xxxx" required>
-                        <small>
-                            <a href="https://support.google.com/accounts/answer/185833" target="_blank">
-                                Get App Password
-                            </a> (requires 2FA enabled)
-                        </small>
-                    </div>
-
-                    <div class="form-group">
                         <label>Your Kindle Email</label>
                         <input type="email" id="kindleEmail" placeholder="your-kindle@kindle.com" required>
                         <small>
@@ -99,6 +83,14 @@
                                 Amazon Kindle Settings
                             </a>
                         </small>
+                    </div>
+
+                    <div style="background: rgba(63, 185, 80, 0.1); border-left: 3px solid var(--accent-primary); padding: var(--space-md); border-radius: var(--border-radius-sm); margin-bottom: var(--space-lg);">
+                        <p style="color: var(--text-secondary); font-size: var(--font-size-sm); margin: 0;">
+                            <strong style="color: var(--accent-primary);">✨ No App Password Needed!</strong><br>
+                            We use Gmail API with your existing Google login to send emails.<br>
+                            Just enter your Kindle email above and you're good to go!
+                        </p>
                     </div>
 
                     <button type="submit" class="btn btn-primary">
@@ -294,8 +286,6 @@
         async function loadGlobalSettings() {
             try {
                 globalSettings = await apiCall('/api/settings/global');
-                document.getElementById('senderEmail').value = globalSettings.sender_email || '';
-                document.getElementById('senderPassword').value = globalSettings.sender_password || '';
                 document.getElementById('kindleEmail').value = globalSettings.kindle_email || '';
             } catch (error) {
                 console.error('Failed to load global settings:', error);
@@ -395,8 +385,6 @@
             event.preventDefault();
 
             const settings = {
-                sender_email: document.getElementById('senderEmail').value,
-                sender_password: document.getElementById('senderPassword').value,
                 kindle_email: document.getElementById('kindleEmail').value
             };
 
@@ -408,7 +396,7 @@
                     body: JSON.stringify(settings)
                 });
                 hideLoading();
-                showToast('✓ Global settings saved to Drive!', 'success');
+                showToast('✓ Kindle email saved! Ready to send books.', 'success');
             } catch (error) {
                 hideLoading();
                 console.error('Failed to save settings:', error);
