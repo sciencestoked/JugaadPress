@@ -6,6 +6,9 @@ jugaadpressenv/
 
 # Secrets
 config.py
+client_secret.json
+credentials.json
+token.json
 
 # Generated files
 *.epub

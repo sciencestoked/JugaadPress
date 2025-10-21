@@ -105,6 +105,33 @@
             51%, 100% { opacity: 0; }
         }
 
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #sidebar-header .subtitle {
+            font-size: 11px;
+        }
+
+        #sidebar-header a:hover {
+            background: var(--accent-primary) !important;
+            color: var(--bg-primary) !important;
+            border-color: var(--accent-primary) !important;
+        }
+
+        #sidebar-header button:hover {
+            background: var(--accent-primary) !important;
+            color: var(--bg-primary) !important;
+            border-color: var(--accent-primary) !important;
+        }
+
+        #sidebar-header button:last-child:hover {
+            background: var(--accent-danger) !important;
+            color: white !important;
+            border-color: var(--accent-danger) !important;
+        }
+
         #sidebar-header .subtitle {
             font-size: 11px;
             color: var(--text-dim);
@@ -396,8 +423,12 @@
             letter-spacing: 0.3px;
         }
 
+        #editor {
+            transition: opacity 0.15s ease;
+        }
+
         #editor.loading {
-            opacity: 0.6;
+            opacity: 0.4;
             pointer-events: none;
         }
 
@@ -1126,7 +1157,20 @@
     <div id="sidebar">
         <div id="sidebar-header">
             <h1>JUGAADPRESS</h1>
-            <div class="subtitle">// HACKER'S NOTEBOOK</div>
+            <div class="subtitle" id="editorSubtitle">// HACKER'S NOTEBOOK</div>
+            <a href="/dashboard" style="display: block; margin-top: 10px; padding: 8px 12px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-secondary); text-decoration: none; font-size: 0.85rem; text-align: center; transition: all 0.2s;">
+                <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+            </a>
+
+            <!-- Download Buttons -->
+            <div style="display: flex; gap: 0.5rem; margin-top: 10px;">
+                <button onclick="downloadBookFromEditor('epub')" style="flex: 1; padding: 8px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-secondary); font-size: 0.85rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 4px;" title="Download EPUB">
+                    <i class="fa-solid fa-download"></i> EPUB
+                </button>
+                <button onclick="downloadBookFromEditor('pdf')" style="flex: 1; padding: 8px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-secondary); font-size: 0.85rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 4px;" title="Download PDF">
+                    <i class="fa-solid fa-file-pdf"></i> PDF
+                </button>
+            </div>
         </div>
         <div id="page-controls">
             <button id="btn-new-page" title="Create New Page">
@@ -1211,6 +1255,12 @@
                 <button id="modal-confirm" class="primary">Confirm</button>
             </div>
         </div>
+    </div>
+
+    <!-- LOADING OVERLAY -->
+    <div id="loadingOverlay" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(13, 17, 23, 0.95); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 10000; backdrop-filter: blur(4px);">
+        <div style="width: 50px; height: 50px; border: 3px solid var(--border-color); border-top: 3px solid var(--accent-primary); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+        <div id="loadingText" style="margin-top: 1.5rem; color: var(--text-secondary); font-size: 0.9rem; letter-spacing: 1px;">Loading editor...</div>
     </div>
 
     <!-- TOAST NOTIFICATION -->
@@ -1317,6 +1367,18 @@
         const toast = document.getElementById('toast');
 
         // ===== UTILITY FUNCTIONS =====
+        function showLoading(message = 'Loading...') {
+            const overlay = document.getElementById('loadingOverlay');
+            const text = document.getElementById('loadingText');
+            text.textContent = message;
+            overlay.style.display = 'flex';
+        }
+
+        function hideLoading() {
+            const overlay = document.getElementById('loadingOverlay');
+            overlay.style.display = 'none';
+        }
+
         function showToast(message, isError = false) {
             const toastEl = document.getElementById('toast');
             const toastMessage = document.getElementById('toast-message');
@@ -1324,6 +1386,38 @@
             toastEl.classList.toggle('error', isError);
             toastEl.classList.add('show');
             setTimeout(() => toastEl.classList.remove('show'), 3000);
+        }
+
+        async function downloadBookFromEditor(format) {
+            const formatName = format.toUpperCase();
+            try {
+                showToast(`Generating ${formatName}...`);
+
+                const response = await fetch(`/api/books/${encodeURIComponent(BOOK_NAME)}/download?format=${format}`);
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to generate book');
+                }
+
+                // Get the blob
+                const blob = await response.blob();
+
+                // Create download link
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${BOOK_NAME}.${format}`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+
+                showToast(`${formatName} downloaded!`);
+            } catch (error) {
+                console.error(`Failed to download ${format}:`, error);
+                showToast(`Error generating ${formatName}: ${error.message}`, true);
+            }
         }
 
         function showModal(title, message, onConfirm) {
@@ -1672,7 +1766,7 @@
             if (pageToShow) {
                 // Load specific page in preview (independent navigation)
                 try {
-                    const response = await fetch(`/api/page/${pageToShow}`);
+                    const response = await fetch(apiUrl(`/api/pages/${pageToShow}`));
                     content = await response.text();
                     state.previewPage = pageToShow;
                     pageName = pageToShow;
@@ -1940,7 +2034,7 @@
                     try {
                         updateStatus('Renaming page...', 'saving');
 
-                        const response = await fetch(`/api/page/${filename}/rename`, {
+                        const response = await fetch(apiUrl(`/api/pages/${filename}/rename`), {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ new_filename: newFilename })
@@ -2112,13 +2206,56 @@
             customText: null
         };
 
+        // Get book name from Flask template
+        const BOOK_NAME = "{{ book_name }}";
+        console.log('Editor initialized for book:', BOOK_NAME);
+
+        // ===== HELPER FUNCTIONS =====
+        function apiUrl(endpoint, includeBook = true) {
+            if (includeBook && !endpoint.includes('?')) {
+                return `${endpoint}?book=${encodeURIComponent(BOOK_NAME)}`;
+            } else if (includeBook && endpoint.includes('?')) {
+                return `${endpoint}&book=${encodeURIComponent(BOOK_NAME)}`;
+            }
+            return endpoint;
+        }
+
         // ===== API FUNCTIONS =====
         async function loadPageList() {
+            console.log('=== loadPageList() called ===');
+            showLoading('Loading pages from Drive...');
+
             try {
-                const response = await fetch('/api/pages');
+                const url = apiUrl('/api/pages');
+                console.log('Fetching pages from:', url);
+
+                const response = await fetch(url);
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Error response text:', errorText);
+                    try {
+                        const error = JSON.parse(errorText);
+                        console.error('Error response JSON:', error);
+                        throw new Error(error.error || 'Failed to load pages');
+                    } catch (e) {
+                        throw new Error(`Failed to load pages: ${errorText}`);
+                    }
+                }
+
                 const pages = await response.json();
+                console.log(`Loaded ${pages.length} pages from Drive:`, pages);
                 state.allPages = pages; // Store for autocomplete
                 pageList.innerHTML = '';
+
+                if (pages.length === 0) {
+                    pageList.innerHTML = '<li style="padding: 10px; color: var(--text-secondary); text-align: center;">No pages yet. Create your first page!</li>';
+                    hideLoading();
+                    return;
+                }
+
                 pages.forEach(page => {
                     const li = document.createElement('li');
 
@@ -2165,9 +2302,15 @@
                 if (pages.length > 0 && !state.currentPage) {
                     loadPageContent(pages[0]);
                 }
+
+                hideLoading();
             } catch (error) {
-                showToast('Failed to load pages', true);
+                console.error('!!! ERROR in loadPageList:', error);
+                console.error('Error stack:', error.stack);
+                hideLoading();
+                showToast('Failed to load pages: ' + error.message, true);
                 updateStatus('Error loading pages', 'error');
+                pageList.innerHTML = `<li style="padding: 10px; color: red;">Error: ${error.message}</li>`;
             }
         }
 
@@ -2189,25 +2332,34 @@
         }
 
         async function loadPage(filename) {
-            // Add loading state for smooth fade
+            // INSTANT FEEDBACK: Update sidebar selection immediately
+            document.querySelectorAll('#page-list li').forEach(li => {
+                const pageName = li.querySelector('.page-name');
+                li.classList.toggle('active', pageName && pageName.textContent === filename);
+            });
+
+            // Fade out current content
             editor.classList.add('loading');
+            updateStatus('Loading...', 'saving');
 
-            const response = await fetch(`/api/page/${filename}`);
-            const content = await response.text();
+            // Wait for fade out (150ms)
+            await new Promise(resolve => setTimeout(resolve, 150));
 
-            // Quick fade transition (50ms) - snappy but smooth
-            setTimeout(() => {
+            // Show loading placeholder
+            editor.value = '// Loading from Drive...';
+
+            try {
+                const response = await fetch(apiUrl(`/api/pages/${filename}`));
+                const content = await response.text();
+
+                // Update editor with actual content and fade in
                 editor.value = content;
                 state.currentPage = filename;
                 state.unsavedChanges = false;
 
-                document.querySelectorAll('#page-list li').forEach(li => {
-                    const pageName = li.querySelector('.page-name');
-                    li.classList.toggle('active', pageName && pageName.textContent === filename);
-                });
-
-                updateStatus(`${filename} loaded`, 'saved');
+                // Remove loading class to fade in
                 editor.classList.remove('loading');
+                updateStatus(`${filename} loaded`, 'saved');
 
                 // Update preview if it's visible
                 if (state.previewVisible) {
@@ -2218,7 +2370,12 @@
                 if (!state.previewVisible) {
                     editor.focus();
                 }
-            }, 50); // Just enough for smooth transition, not noticeable delay
+            } catch (error) {
+                editor.value = '// Error loading page from Drive';
+                editor.classList.remove('loading');
+                updateStatus('Error loading page', 'error');
+                showToast('Failed to load page', true);
+            }
         }
 
         async function savePageContent() {
@@ -2226,7 +2383,7 @@
 
             try {
                 updateStatus('Saving...', 'saving');
-                await fetch(`/api/page/${state.currentPage}`, {
+                await fetch(apiUrl(`/api/pages/${state.currentPage}`), {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain; charset=UTF-8' },
                     body: editor.value
@@ -2291,10 +2448,10 @@
                 const newPageBtn = document.getElementById('btn-new-page');
                 newPageBtn.disabled = true;
 
-                const response = await fetch('/api/page', {
+                const response = await fetch(apiUrl(`/api/pages/${filename}`), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ filename })
+                    body: JSON.stringify({ book: BOOK_NAME, content: '' })
                 });
 
                 if (response.ok) {
@@ -2330,7 +2487,7 @@
                     try {
                         updateStatus('Deleting page...', 'saving');
 
-                        const response = await fetch(`/api/page/${filename}`, {
+                        const response = await fetch(apiUrl(`/api/pages/${filename}`), {
                             method: 'DELETE'
                         });
 
@@ -2382,7 +2539,26 @@
         });
 
         // ===== INITIALIZE =====
+        async function loadEditorUserInfo() {
+            try {
+                const response = await fetch('/api/user');
+                if (response.ok) {
+                    const user = await response.json();
+                    if (user.name) {
+                        const firstName = user.name.split(' ')[0].toLowerCase();
+                        const subtitleEl = document.getElementById('editorSubtitle');
+                        subtitleEl.innerHTML = `// <span style="color: #ff6b6b; text-shadow: 0 0 10px rgba(255, 107, 107, 0.4);">@${firstName}</span>`;
+                    }
+                }
+            } catch (error) {
+                console.log('Could not load user info:', error);
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOMContentLoaded fired!');
+            console.log('About to call loadPageList()');
+            loadEditorUserInfo();
             loadPageList();
             editor.focus();
         });
