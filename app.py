@@ -45,9 +45,18 @@ SCOPES = [
     'https://www.googleapis.com/auth/gmail.send'  # For sending emails via Gmail API
 ]
 
-# OAuth configuration from environment variables or use local defaults
+# OAuth configuration from environment variables or client_secret.json
 GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
 GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET')
+
+# Fallback to client_secret.json for local development
+if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET:
+    CLIENT_SECRETS_FILE = "client_secret.json"
+    if os.path.exists(CLIENT_SECRETS_FILE):
+        with open(CLIENT_SECRETS_FILE, 'r') as f:
+            client_secrets = json.load(f)
+            GOOGLE_CLIENT_ID = client_secrets['web']['client_id']
+            GOOGLE_CLIENT_SECRET = client_secrets['web']['client_secret']
 
 # Determine redirect URI based on environment
 if os.environ.get('RENDER'):
