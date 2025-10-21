@@ -26,15 +26,8 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
-# Generate a consistent secret key (stored in file for persistence)
-SECRET_KEY_FILE = 'secret_key.txt'
-if os.path.exists(SECRET_KEY_FILE):
-    with open(SECRET_KEY_FILE, 'r') as f:
-        app.secret_key = f.read().strip()
-else:
-    app.secret_key = secrets.token_hex(32)
-    with open(SECRET_KEY_FILE, 'w') as f:
-        f.write(app.secret_key)
+# Secret key from environment variable or generate for local dev
+app.secret_key = os.environ.get('FLASK_SECRET_KEY') or secrets.token_hex(32)
 
 # Session configuration for OAuth
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
@@ -52,8 +45,17 @@ SCOPES = [
     'https://www.googleapis.com/auth/gmail.send'  # For sending emails via Gmail API
 ]
 
-CLIENT_SECRETS_FILE = "client_secret.json"
-REDIRECT_URI = "http://localhost:5001/oauth2callback"
+# OAuth configuration from environment variables or use local defaults
+GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
+GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET')
+
+# Determine redirect URI based on environment
+if os.environ.get('RENDER'):
+    # Production on Render
+    REDIRECT_URI = "https://jugaadpress.onrender.com/oauth2callback"
+else:
+    # Local development
+    REDIRECT_URI = "http://localhost:5001/oauth2callback"
 
 # ============================================================================
 # HELPER CLASSES
@@ -496,8 +498,15 @@ def landing():
 @app.route('/login')
 def login():
     """Initiate Google OAuth flow"""
-    flow = Flow.from_client_secrets_file(
-        CLIENT_SECRETS_FILE,
+    flow = Flow.from_client_config(
+        {
+            "web": {
+                "client_id": GOOGLE_CLIENT_ID,
+                "client_secret": GOOGLE_CLIENT_SECRET,
+                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                "token_uri": "https://oauth2.googleapis.com/token",
+            }
+        },
         scopes=SCOPES,
         redirect_uri=REDIRECT_URI
     )
@@ -531,8 +540,15 @@ def oauth2callback():
         """, 400
 
     try:
-        flow = Flow.from_client_secrets_file(
-            CLIENT_SECRETS_FILE,
+        flow = Flow.from_client_config(
+            {
+                "web": {
+                    "client_id": GOOGLE_CLIENT_ID,
+                    "client_secret": GOOGLE_CLIENT_SECRET,
+                    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                    "token_uri": "https://oauth2.googleapis.com/token",
+                }
+            },
             scopes=SCOPES,
             state=state,
             redirect_uri=REDIRECT_URI
