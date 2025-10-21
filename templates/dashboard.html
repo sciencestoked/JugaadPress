@@ -456,6 +456,35 @@
             }
         }
 
+        function showModal(title, message, onConfirm) {
+            const overlay = document.getElementById('modal-overlay');
+            const confirmBtn = document.getElementById('modal-confirm');
+            const cancelBtn = document.getElementById('modal-cancel');
+
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-message').textContent = message;
+            overlay.classList.add('show');
+
+            const handleConfirm = () => {
+                overlay.classList.remove('show');
+                onConfirm();
+                cleanup();
+            };
+
+            const handleCancel = () => {
+                overlay.classList.remove('show');
+                cleanup();
+            };
+
+            const cleanup = () => {
+                confirmBtn.removeEventListener('click', handleConfirm);
+                cancelBtn.removeEventListener('click', handleCancel);
+            };
+
+            confirmBtn.addEventListener('click', handleConfirm);
+            cancelBtn.addEventListener('click', handleCancel);
+        }
+
         function showInputModal(onConfirm) {
             const overlay = document.getElementById('input-modal-overlay');
             const input = document.getElementById('input-modal-input');
@@ -517,28 +546,32 @@
         }
 
         async function deleteBook(bookName) {
-            if (!confirm(`Delete "${bookName}"?\n\nThis will move it to your Drive trash.`)) return;
+            showModal(
+                '⚠️ Delete Book',
+                `Delete "${bookName}"?\n\nThis will move it to your Drive trash.`,
+                async () => {
+                    try {
+                        showLoading('Deleting book...');
+                        await fetch(`/api/books/${encodeURIComponent(bookName)}`, {
+                            method: 'DELETE'
+                        });
 
-            try {
-                showLoading('Deleting book...');
-                await fetch(`/api/books/${encodeURIComponent(bookName)}`, {
-                    method: 'DELETE'
-                });
+                        if (selectedBook === bookName) {
+                            selectedBook = null;
+                            document.getElementById('noBookSelected').style.display = 'block';
+                            document.getElementById('bookSettingsForm').style.display = 'none';
+                        }
 
-                if (selectedBook === bookName) {
-                    selectedBook = null;
-                    document.getElementById('noBookSelected').style.display = 'block';
-                    document.getElementById('bookSettingsForm').style.display = 'none';
+                        await loadBooks();
+                        hideLoading();
+                        showToast(`✓ Book "${bookName}" deleted`, 'success');
+                    } catch (error) {
+                        hideLoading();
+                        console.error('Failed to delete book:', error);
+                        showToast('✗ Error deleting book', 'error');
+                    }
                 }
-
-                await loadBooks();
-                hideLoading();
-                showToast(`✓ Book "${bookName}" deleted`, 'success');
-            } catch (error) {
-                hideLoading();
-                console.error('Failed to delete book:', error);
-                showToast('✗ Error deleting book', 'error');
-            }
+            );
         }
 
         function editBook(bookName) {
