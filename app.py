@@ -6,7 +6,6 @@ Web-based version with Google OAuth and multi-book support
 import os
 import json
 import time
-import tempfile
 import re
 from io import BytesIO
 from flask import Flask, request, render_template, jsonify, session, redirect, url_for, send_file
@@ -254,7 +253,6 @@ class DriveManager:
 
             # Download content
             from googleapiclient.http import MediaIoBaseDownload
-            from io import BytesIO
 
             request = self.service.files().get_media(fileId=file_id)
             file_buffer = BytesIO()
@@ -268,14 +266,13 @@ class DriveManager:
             return json.loads(content)
 
         except Exception as e:
-            print(f"Error reading JSON file {filename}: {e}")
+            logger.error(f"Error reading JSON file {filename}: {e}")
             return None
 
     def _write_json_file(self, filename, data, parent_id):
         """Write JSON file to Drive"""
         try:
             from googleapiclient.http import MediaIoBaseUpload
-            from io import BytesIO
 
             content = json.dumps(data, indent=2)
             media = MediaIoBaseUpload(
@@ -316,7 +313,7 @@ class DriveManager:
             return True
 
         except Exception as e:
-            print(f"Error writing JSON file {filename}: {e}")
+            logger.error(f"Error writing JSON file {filename}: {e}")
             return False
 
     def list_pages(self, book_name):
@@ -363,7 +360,6 @@ class DriveManager:
 
             # Download content
             from googleapiclient.http import MediaIoBaseDownload
-            from io import BytesIO
 
             request = self.service.files().get_media(fileId=file_id)
             file_buffer = BytesIO()
@@ -382,7 +378,6 @@ class DriveManager:
         """Write content to a page"""
         def _execute():
             from googleapiclient.http import MediaIoBaseUpload
-            from io import BytesIO
 
             book_id = self._get_book_id(book_name)
             if not book_id:

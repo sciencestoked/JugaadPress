@@ -2208,7 +2208,6 @@
 
         // Get book name from Flask template
         const BOOK_NAME = "{{ book_name }}";
-        console.log('Editor initialized for book:', BOOK_NAME);
 
         // ===== HELPER FUNCTIONS =====
         function apiUrl(endpoint, includeBook = true) {
@@ -2222,23 +2221,16 @@
 
         // ===== API FUNCTIONS =====
         async function loadPageList() {
-            console.log('=== loadPageList() called ===');
             showLoading('Loading pages from Drive...');
 
             try {
                 const url = apiUrl('/api/pages');
-                console.log('Fetching pages from:', url);
-
                 const response = await fetch(url);
-                console.log('Response status:', response.status);
-                console.log('Response headers:', response.headers);
 
                 if (!response.ok) {
                     const errorText = await response.text();
-                    console.error('Error response text:', errorText);
                     try {
                         const error = JSON.parse(errorText);
-                        console.error('Error response JSON:', error);
                         throw new Error(error.error || 'Failed to load pages');
                     } catch (e) {
                         throw new Error(`Failed to load pages: ${errorText}`);
@@ -2246,7 +2238,6 @@
                 }
 
                 const pages = await response.json();
-                console.log(`Loaded ${pages.length} pages from Drive:`, pages);
                 state.allPages = pages; // Store for autocomplete
                 pageList.innerHTML = '';
 
@@ -2305,8 +2296,7 @@
 
                 hideLoading();
             } catch (error) {
-                console.error('!!! ERROR in loadPageList:', error);
-                console.error('Error stack:', error.stack);
+                console.error('Error loading pages:', error);
                 hideLoading();
                 showToast('Failed to load pages: ' + error.message, true);
                 updateStatus('Error loading pages', 'error');
@@ -2551,13 +2541,11 @@
                     }
                 }
             } catch (error) {
-                console.log('Could not load user info:', error);
+                // Silent fail - user info is optional
             }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('DOMContentLoaded fired!');
-            console.log('About to call loadPageList()');
             loadEditorUserInfo();
             loadPageList();
             editor.focus();
