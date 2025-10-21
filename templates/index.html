@@ -1247,8 +1247,11 @@
                 updateStatus('Saving...', 'saving');
                 await fetch(apiUrl(`/api/pages/${state.currentPage}`), {
                     method: 'POST',
-                    headers: { 'Content-Type': 'text/plain; charset=UTF-8' },
-                    body: editor.value
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        book: BOOK_NAME,
+                        content: editor.value
+                    })
                 });
                 state.unsavedChanges = false;
                 updateStatus('Saved!', 'saved');
