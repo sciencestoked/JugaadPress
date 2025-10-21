@@ -830,7 +830,7 @@ def api_save_page(filename):
         success = dm.write_page(book_name, filename, content)
 
         if success:
-            return jsonify({'success': True}), 200
+            return jsonify({'success': True, 'filename': filename}), 200
         else:
             return jsonify({'error': 'Failed to save page'}), 500
     except Exception as e:
