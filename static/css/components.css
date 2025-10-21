@@ -226,11 +226,19 @@
     padding: 0.75rem;
     background: var(--bg-secondary);
     border: var(--border-width) solid var(--border-color);
-    border-radius: var(--border-radius-sm);
+    border-radius: var(--border-radius-md);
     color: var(--text-primary);
     font-size: var(--font-size-md);
     font-family: var(--font-mono);
     transition: all var(--transition-normal) var(--ease-standard);
+    position: relative;
+}
+
+.form-group input:hover,
+.form-group select:hover,
+.form-group textarea:hover {
+    border-color: var(--accent-secondary);
+    background: var(--bg-tertiary);
 }
 
 .form-group input:focus,
@@ -238,8 +246,9 @@
 .form-group textarea:focus {
     outline: none;
     border-color: var(--accent-primary);
-    box-shadow: var(--glow-sm);
+    box-shadow: 0 0 0 3px rgba(63, 185, 80, 0.1), 0 0 20px rgba(63, 185, 80, 0.15);
     background: var(--bg-tertiary);
+    transform: translateY(-1px);
 }
 
 .form-group small {

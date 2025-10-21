@@ -6,7 +6,7 @@
     align-items: center;
     justify-content: center;
     gap: var(--space-sm);
-    padding: var(--space-sm) var(--space-md);
+    padding: var(--space-sm) var(--space-lg);
     font-family: var(--font-mono);
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-medium);
@@ -18,6 +18,27 @@
     text-decoration: none;
     white-space: nowrap;
     user-select: none;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Ripple effect on click */
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn:active::before {
+    width: 300px;
+    height: 300px;
 }
 
 .btn:disabled {
@@ -27,23 +48,35 @@
     pointer-events: none;
 }
 
+/* Icon sizing */
+.btn i {
+    font-size: 1em;
+    transition: transform var(--transition-normal) var(--ease-standard);
+}
+
+.btn:hover:not(:disabled) i {
+    transform: scale(1.1);
+}
+
 /* ===== BUTTON VARIANTS ===== */
 
-/* Primary - Main actions */
+/* Primary - Main actions (Green glow) */
 .btn-primary {
     background: var(--accent-primary);
     color: var(--bg-primary);
     border-color: var(--accent-primary);
+    box-shadow: 0 0 0 rgba(63, 185, 80, 0);
 }
 
 .btn-primary:hover:not(:disabled) {
     background: #4ac959;
-    box-shadow: var(--glow-md);
+    box-shadow: 0 0 20px rgba(63, 185, 80, 0.4), 0 4px 12px rgba(63, 185, 80, 0.2);
     transform: translateY(-2px);
 }
 
 .btn-primary:active {
     transform: translateY(0);
+    box-shadow: 0 0 10px rgba(63, 185, 80, 0.3);
 }
 
 /* Secondary - Alternative actions */
@@ -57,10 +90,11 @@
     background: var(--bg-secondary);
     border-color: var(--accent-secondary);
     color: var(--accent-secondary);
-    box-shadow: var(--glow-sm);
+    box-shadow: 0 0 15px rgba(88, 166, 255, 0.2);
+    transform: translateY(-1px);
 }
 
-/* Danger - Destructive actions */
+/* Danger - Destructive actions (Red glow) */
 .btn-danger {
     background: transparent;
     color: var(--accent-danger);
@@ -70,7 +104,8 @@
 .btn-danger:hover:not(:disabled) {
     background: var(--accent-danger);
     color: white;
-    box-shadow: 0 0 15px var(--shadow-glow-danger);
+    box-shadow: 0 0 20px rgba(248, 81, 73, 0.4), 0 4px 12px rgba(248, 81, 73, 0.2);
+    transform: translateY(-2px);
 }
 
 /* Ghost - Minimal style */
@@ -84,6 +119,7 @@
     background: var(--bg-tertiary);
     color: var(--text-primary);
     border-color: var(--border-color);
+    transform: translateX(3px);
 }
 
 /* Link - Text-only button */
@@ -102,24 +138,19 @@
 /* ===== BUTTON SIZES ===== */
 
 .btn-sm {
-    padding: 0.4rem 0.8rem;
+    padding: 0.45rem 0.9rem;
     font-size: var(--font-size-xs);
+    gap: 0.35rem;
 }
 
 .btn-md {
-    padding: var(--space-sm) var(--space-md);
+    padding: var(--space-sm) var(--space-lg);
     font-size: var(--font-size-sm);
 }
 
 .btn-lg {
-    padding: var(--space-md) var(--space-xl);
+    padding: 0.85rem 1.75rem;
     font-size: var(--font-size-base);
-}
-
-/* ===== BUTTON WITH ICON ===== */
-
-.btn i {
-    font-size: 0.9em;
 }
 
 .btn-icon-only {
@@ -127,16 +158,17 @@
     aspect-ratio: 1;
 }
 
-/* ===== SPECIAL BUTTONS ===== */
+/* ===== SPECIAL THEMED BUTTONS ===== */
 
 /* Terminal cursor button */
 .btn-terminal::before {
     content: ">";
     margin-right: var(--space-xs);
     font-size: 1.2em;
+    animation: blink 1.5s infinite;
 }
 
-/* Google sign-in button */
+/* Google Sign In - Vibrant green with icon */
 .btn-google {
     background: var(--accent-primary);
     color: var(--bg-primary);
@@ -144,36 +176,265 @@
     padding: var(--space-md) var(--space-xl);
     font-size: var(--font-size-base);
     font-weight: var(--font-weight-semibold);
+    box-shadow: 0 0 0 rgba(63, 185, 80, 0);
 }
 
-.btn-google::before {
+.btn-google::after {
     content: ">";
+    margin-left: var(--space-sm);
     font-size: 1.2rem;
+    opacity: 0;
+    transition: all var(--transition-normal) var(--ease-standard);
 }
 
 .btn-google:hover:not(:disabled) {
     background: #4ac959;
-    box-shadow: var(--glow-lg);
-    transform: translateY(-2px);
+    box-shadow: 0 0 30px rgba(63, 185, 80, 0.5), 0 6px 20px rgba(63, 185, 80, 0.3);
+    transform: translateY(-3px);
 }
 
-/* Send to Kindle button */
-.btn-kindle {
-    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-    color: var(--bg-primary);
+.btn-google:hover:not(:disabled)::after {
+    opacity: 1;
+    margin-left: var(--space-md);
+}
+
+/* Send to Kindle - Epic gradient button with glow */
+.btn-kindle,
+#send-button {
+    background: linear-gradient(135deg, #3fb950 0%, #58a6ff 100%);
+    color: white;
     border: none;
-    padding: var(--space-sm) var(--space-lg);
+    padding: 0.85rem 1.75rem;
     font-weight: var(--font-weight-semibold);
-    box-shadow: var(--glow-md);
+    font-size: var(--font-size-base);
+    font-family: var(--font-mono);
+    box-shadow: 0 4px 15px rgba(63, 185, 80, 0.3), 0 0 40px rgba(88, 166, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--border-radius-md);
+    cursor: pointer;
+    transition: all var(--transition-normal) var(--ease-standard);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
 }
 
-.btn-kindle:hover:not(:disabled) {
+.btn-kindle::before,
+#send-button::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        45deg,
+        transparent,
+        rgba(255, 255, 255, 0.1),
+        transparent
+    );
+    transform: rotate(45deg);
+    transition: all 0.6s;
+}
+
+.btn-kindle:hover:not(:disabled),
+#send-button:hover:not(:disabled) {
+    background: linear-gradient(135deg, #4ac959 0%, #6cb6ff 100%);
+    box-shadow: 0 6px 25px rgba(63, 185, 80, 0.4), 0 0 60px rgba(88, 166, 255, 0.4);
+    transform: translateY(-3px) scale(1.02);
+}
+
+.btn-kindle:hover:not(:disabled)::before,
+#send-button:hover:not(:disabled)::before {
+    left: 100%;
+}
+
+.btn-kindle:active,
+#send-button:active {
+    transform: translateY(-1px) scale(1);
+}
+
+.btn-kindle i,
+#send-button i {
+    filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.5));
+}
+
+/* ===== DASHBOARD SPECIFIC BUTTONS ===== */
+
+/* New Book Button - Full width with subtle glow */
+.btn-new-book {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    background: var(--bg-tertiary);
+    border: var(--border-width) solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: var(--border-radius-md);
+    cursor: pointer;
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    transition: all var(--transition-normal) var(--ease-standard);
+    margin-top: var(--space-md);
+    font-family: var(--font-mono);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-new-book::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(63, 185, 80, 0.1), transparent);
+    transition: left 0.5s;
+}
+
+.btn-new-book:hover {
+    border-color: var(--accent-primary);
+    background: var(--accent-primary);
+    color: var(--bg-primary);
+    box-shadow: 0 0 20px rgba(63, 185, 80, 0.3), 0 4px 12px rgba(0, 0, 0, 0.2);
     transform: translateY(-2px);
-    box-shadow: 0 5px 25px var(--shadow-glow-primary);
 }
 
-.btn-kindle:active {
-    transform: translateY(0);
+.btn-new-book:hover::before {
+    left: 100%;
+}
+
+.btn-new-book i {
+    transition: transform var(--transition-normal);
+}
+
+.btn-new-book:hover i {
+    transform: rotate(90deg) scale(1.1);
+}
+
+/* Download EPUB/PDF Buttons - Distinct colors */
+.btn-download-epub,
+.btn-download-pdf {
+    padding: 0.75rem var(--space-lg);
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: var(--border-width) solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-md);
+    cursor: pointer;
+    transition: all var(--transition-normal) var(--ease-standard);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    font-family: var(--font-mono);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-download-epub::after,
+.btn-download-pdf::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--accent-primary);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--transition-normal) var(--ease-standard);
+}
+
+.btn-download-pdf::after {
+    background: var(--accent-danger);
+}
+
+.btn-download-epub:hover {
+    background: var(--accent-primary);
+    color: var(--bg-primary);
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 20px rgba(63, 185, 80, 0.3);
+    transform: translateY(-2px);
+}
+
+.btn-download-epub:hover::after {
+    transform: scaleX(1);
+}
+
+.btn-download-pdf:hover {
+    background: var(--accent-danger);
+    color: white;
+    border-color: var(--accent-danger);
+    box-shadow: 0 0 20px rgba(248, 81, 73, 0.3);
+    transform: translateY(-2px);
+}
+
+.btn-download-pdf:hover::after {
+    transform: scaleX(1);
+}
+
+/* Send to Kindle (Dashboard version) */
+.btn-send-kindle {
+    width: 100%;
+    padding: var(--space-md) var(--space-xl);
+    background: linear-gradient(135deg, #58a6ff 0%, #3fb950 100%);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius-md);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-lg);
+    cursor: pointer;
+    transition: all var(--transition-normal) var(--ease-standard);
+    margin-top: var(--space-xl);
+    font-family: var(--font-mono);
+    box-shadow: 0 4px 15px rgba(88, 166, 255, 0.3), 0 0 40px rgba(63, 185, 80, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-send-kindle::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        45deg,
+        transparent,
+        rgba(255, 255, 255, 0.15),
+        transparent
+    );
+    transform: rotate(45deg);
+    transition: all 0.6s;
+}
+
+.btn-send-kindle:hover {
+    background: linear-gradient(135deg, #6cb6ff 0%, #4ac959 100%);
+    box-shadow: 0 6px 25px rgba(88, 166, 255, 0.4), 0 0 60px rgba(63, 185, 80, 0.4);
+    transform: translateY(-3px) scale(1.01);
+}
+
+.btn-send-kindle:hover::before {
+    left: 100%;
+}
+
+.btn-send-kindle i {
+    filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.6));
+    animation: kindlePulse 2s ease-in-out infinite;
+}
+
+@keyframes kindlePulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
 }
 
 /* ===== BUTTON LOADING STATE ===== */
@@ -213,4 +474,29 @@
 
 .btn-group-stretch .btn {
     flex: 1;
+}
+
+/* ===== ACCESSIBILITY & FOCUS ===== */
+
+.btn:focus-visible {
+    outline: 2px solid var(--accent-primary);
+    outline-offset: 2px;
+}
+
+/* ===== HOVER GLOW ENHANCEMENT ===== */
+
+.btn-primary:hover:not(:disabled),
+.btn-google:hover:not(:disabled),
+.btn-kindle:hover:not(:disabled),
+#send-button:hover:not(:disabled) {
+    animation: gentleGlow 1.5s ease-in-out infinite;
+}
+
+@keyframes gentleGlow {
+    0%, 100% {
+        filter: brightness(1);
+    }
+    50% {
+        filter: brightness(1.1);
+    }
 }
