@@ -182,6 +182,19 @@
         </div>
     </div>
 
+    <!-- Input Modal -->
+    <div class="modal-overlay" id="input-modal-overlay">
+        <div class="modal">
+            <h2 class="modal-header" id="input-modal-title">Create New Book</h2>
+            <p class="modal-body" id="input-modal-message">Enter a name for your new book:</p>
+            <input type="text" id="input-modal-input" placeholder="e.g., My Book" style="width: 100%; background: var(--bg-tertiary); border: var(--border-width) solid var(--border-color); color: var(--text-primary); padding: 12px var(--space-md); border-radius: var(--border-radius-md); font-family: var(--font-mono); font-size: var(--font-size-md); margin-bottom: var(--space-lg); transition: all var(--transition-normal);">
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="input-modal-cancel">Cancel</button>
+                <button class="btn btn-primary" id="input-modal-confirm">Create</button>
+            </div>
+        </div>
+    </div>
+
     <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
     <script>
         // State
@@ -443,25 +456,64 @@
             }
         }
 
-        async function createNewBook() {
-            const bookName = prompt('Enter book name:');
-            if (!bookName || !bookName.trim()) return;
+        function showInputModal(onConfirm) {
+            const overlay = document.getElementById('input-modal-overlay');
+            const input = document.getElementById('input-modal-input');
+            const confirmBtn = document.getElementById('input-modal-confirm');
+            const cancelBtn = document.getElementById('input-modal-cancel');
 
-            try {
-                showLoading('Creating book in Drive...');
-                await fetch('/api/books', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name: bookName.trim() })
-                });
-                await loadBooks();
-                hideLoading();
-                showToast(`✓ Book "${bookName}" created!`, 'success');
-            } catch (error) {
-                hideLoading();
-                console.error('Failed to create book:', error);
-                showToast('✗ Error creating book', 'error');
-            }
+            input.value = '';
+            overlay.classList.add('show');
+            setTimeout(() => input.focus(), 100);
+
+            const handleConfirm = () => {
+                const value = input.value.trim();
+                if (value) {
+                    overlay.classList.remove('show');
+                    onConfirm(value);
+                    cleanup();
+                }
+            };
+
+            const handleCancel = () => {
+                overlay.classList.remove('show');
+                cleanup();
+            };
+
+            const handleEnter = (e) => {
+                if (e.key === 'Enter') handleConfirm();
+                if (e.key === 'Escape') handleCancel();
+            };
+
+            const cleanup = () => {
+                confirmBtn.removeEventListener('click', handleConfirm);
+                cancelBtn.removeEventListener('click', handleCancel);
+                input.removeEventListener('keydown', handleEnter);
+            };
+
+            confirmBtn.addEventListener('click', handleConfirm);
+            cancelBtn.addEventListener('click', handleCancel);
+            input.addEventListener('keydown', handleEnter);
+        }
+
+        async function createNewBook() {
+            showInputModal(async (bookName) => {
+                try {
+                    showLoading('Creating book in Drive...');
+                    await fetch('/api/books', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name: bookName })
+                    });
+                    await loadBooks();
+                    hideLoading();
+                    showToast(`✓ Book "${bookName}" created!`, 'success');
+                } catch (error) {
+                    hideLoading();
+                    console.error('Failed to create book:', error);
+                    showToast('✗ Error creating book', 'error');
+                }
+            });
         }
 
         async function deleteBook(bookName) {

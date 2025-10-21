@@ -1384,12 +1384,31 @@
 
         // ===== NEW PAGE BUTTON =====
         document.getElementById('btn-new-page').addEventListener('click', () => {
+            // Calculate next page number
+            const pageNumbers = state.allPages
+                .map(page => {
+                    const match = page.match(/^(\d+)_/);
+                    return match ? parseInt(match[1]) : 0;
+                })
+                .filter(num => num > 0);
+
+            const nextNum = pageNumbers.length > 0 ? Math.max(...pageNumbers) + 1 : 1;
+            const suggestedName = `${String(nextNum).padStart(2, '0')}_`;
+
             showInputModal(
                 'Create New Page',
-                'Enter a filename for your new page (e.g., "03_chapter_one" or "notes"):',
-                'e.g., 03_my_page',
+                'Enter a filename for your new page:',
+                'e.g., my_page',
                 createNewPage
             );
+
+            // Pre-fill with page number
+            const input = document.getElementById('input-modal-input');
+            input.value = suggestedName;
+            // Position cursor after the number prefix
+            setTimeout(() => {
+                input.setSelectionRange(suggestedName.length, suggestedName.length);
+            }, 0);
         });
 
         // ===== WARN ON PAGE LEAVE =====
