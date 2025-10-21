@@ -24,9 +24,15 @@
         <div id="sidebar-header">
             <h1>JUGAADPRESS</h1>
             <div class="subtitle" id="editorSubtitle">// HACKER'S NOTEBOOK</div>
-            <a href="/dashboard" style="display: block; margin-top: 10px; padding: 8px 12px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-secondary); text-decoration: none; font-size: 0.85rem; text-align: center; transition: all 0.2s;">
-                <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
-            </a>
+            <!-- Navigation Buttons -->
+            <div style="display: flex; gap: 0.5rem; margin-top: 10px;">
+                <a href="/dashboard" class="btn btn-secondary btn-sm" style="flex: 1; text-decoration: none;">
+                    <i class="fa-solid fa-arrow-left"></i> Dashboard
+                </a>
+                <a href="/logout" class="btn btn-danger btn-sm" style="text-decoration: none;">
+                    <i class="fa-solid fa-sign-out-alt"></i>
+                </a>
+            </div>
 
             <!-- Download Buttons -->
             <div style="display: flex; gap: 0.5rem; margin-top: 10px;">
