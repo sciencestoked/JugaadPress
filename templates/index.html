@@ -225,7 +225,8 @@
             sending: false,
             allPages: [],
             autocompleteVisible: false,
-            selectedAutocompleteIndex: 0
+            selectedAutocompleteIndex: 0,
+            operationInProgress: false
         };
 
         // ===== DOM ELEMENTS =====
@@ -880,7 +881,7 @@
         // ===== PAGE RENAME FUNCTION =====
         async function enableRename(pageNameSpan, filename) {
             // Prevent multiple renames at once
-            if (document.querySelector('.rename-input')) return;
+            if (document.querySelector('.rename-input') || state.operationInProgress) return;
 
             const originalText = filename;
             const filenameWithoutExt = filename.replace('.md', '');
@@ -904,9 +905,10 @@
                 if (save && newFilename && newFilename !== filenameWithoutExt) {
                     // Attempt rename
                     try {
+                        lockPageList();
                         updateStatus('Renaming page...', 'saving');
 
-                        const response = await fetch(apiUrl(`/api/pages/${filename}/rename`), {
+                        const response = await fetch(apiUrl(`/api/pages/${filename}/rename?book=${BOOK_NAME}`), {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ new_filename: newFilename })
@@ -933,6 +935,8 @@
                         showToast('Network error while renaming page', true);
                         pageNameSpan.textContent = originalText;
                         pageNameSpan.classList.remove('editing');
+                    } finally {
+                        unlockPageList();
                     }
                 } else {
                     // Cancel rename
@@ -1344,12 +1348,31 @@
             }
         }
 
+        function lockPageList() {
+            state.operationInProgress = true;
+            document.querySelectorAll('#page-list button, #page-list .page-name').forEach(el => {
+                el.style.pointerEvents = 'none';
+                el.style.opacity = '0.5';
+            });
+        }
+
+        function unlockPageList() {
+            state.operationInProgress = false;
+            document.querySelectorAll('#page-list button, #page-list .page-name').forEach(el => {
+                el.style.pointerEvents = '';
+                el.style.opacity = '';
+            });
+        }
+
         async function deletePage(filename) {
+            if (state.operationInProgress) return;
+
             showModal(
                 '⚠️ Delete Page',
                 `Are you sure you want to delete "${filename}"? This action cannot be undone.`,
                 async () => {
                     try {
+                        lockPageList();
                         updateStatus('Deleting page...', 'saving');
 
                         const response = await fetch(apiUrl(`/api/pages/${filename}`), {
@@ -1380,6 +1403,8 @@
                     } catch (error) {
                         showToast('Network error while deleting page', true);
                         updateStatus('Error', 'error');
+                    } finally {
+                        unlockPageList();
                     }
                 }
             );

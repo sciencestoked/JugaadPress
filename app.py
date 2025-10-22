@@ -466,6 +466,58 @@ class DriveManager:
 
         return self._retry_on_error(_execute)
 
+    def rename_page(self, book_name, old_filename, new_filename):
+        """Rename a page file"""
+        def _execute():
+            book_id = self._get_book_id(book_name)
+            if not book_id:
+                return False
+
+            # Ensure filenames have .md extension
+            if not old_filename.endswith('.md'):
+                old_filename_with_ext = f"{old_filename}.md"
+            else:
+                old_filename_with_ext = old_filename
+
+            if not new_filename.endswith('.md'):
+                new_filename_with_ext = f"{new_filename}.md"
+            else:
+                new_filename_with_ext = new_filename
+
+            # Check if new name already exists
+            check_query = f"name='{new_filename_with_ext}' and '{book_id}' in parents and trashed=false"
+            check_results = self.service.files().list(
+                q=check_query,
+                spaces='drive',
+                fields='files(id)'
+            ).execute()
+
+            if check_results.get('files', []):
+                return False  # New name already exists
+
+            # Find old file
+            query = f"name='{old_filename_with_ext}' and '{book_id}' in parents and trashed=false"
+            results = self.service.files().list(
+                q=query,
+                spaces='drive',
+                fields='files(id)'
+            ).execute()
+
+            files = results.get('files', [])
+            if not files:
+                return False
+
+            # Rename file
+            self.service.files().update(
+                fileId=files[0]['id'],
+                body={'name': new_filename_with_ext}
+            ).execute()
+
+            logger.info(f"Renamed page: {old_filename_with_ext} -> {new_filename_with_ext}")
+            return True
+
+        return self._retry_on_error(_execute)
+
     def delete_page(self, book_name, filename):
         """Delete a page (move to trash)"""
         def _execute():
@@ -825,6 +877,36 @@ def api_save_global_settings():
     except Exception as e:
         logger.error(f"Error saving global settings: {e}")
         return jsonify({'error': 'Failed to save global settings'}), 500
+
+
+@app.route('/api/pages/<path:filename>/rename', methods=['POST'])
+@login_required
+def api_rename_page(filename):
+    """Rename a page"""
+    try:
+        data = request.get_json()
+        book_name = request.args.get('book')
+        new_filename = data.get('new_filename')
+
+        if not book_name or not new_filename:
+            return jsonify({'error': 'Book name and new filename required'}), 400
+
+        dm = get_drive_manager()
+        if not dm:
+            return jsonify({'error': 'Not authenticated'}), 401
+
+        logger.info(f"Renaming page: {filename} -> {new_filename} in book: {book_name}")
+        success = dm.rename_page(book_name, filename, new_filename)
+
+        if success:
+            # Return with .md extension added
+            final_name = new_filename if new_filename.endswith('.md') else f"{new_filename}.md"
+            return jsonify({'success': True, 'new_filename': final_name}), 200
+        else:
+            return jsonify({'error': 'Failed to rename page (may already exist)'}), 400
+    except Exception as e:
+        logger.error(f"Error renaming page: {e}")
+        return jsonify({'error': 'Failed to rename page'}), 500
 
 
 @app.route('/editor/<book_name>')
