@@ -397,6 +397,9 @@
         }
 
         function triggerChange() {
+            // Don't trigger if no page is loaded yet
+            if (!state.currentPage) return;
+
             state.unsavedChanges = true;
             updatePreview();
             clearTimeout(state.saveTimeout);
@@ -1204,6 +1207,9 @@
                 li.classList.toggle('active', pageName && pageName.textContent === filename);
             });
 
+            // CRITICAL: Cancel any pending auto-save
+            clearTimeout(state.saveTimeout);
+
             // Fade out current content
             editor.classList.add('loading');
             updateStatus('Loading...', 'saving');
@@ -1211,21 +1217,26 @@
             // Wait for fade out (150ms)
             await new Promise(resolve => setTimeout(resolve, 150));
 
-            // Show loading placeholder
-            editor.value = '// Loading from Drive...';
+            // DON'T SET PLACEHOLDER - just keep loading class for visual feedback
+            // The .loading class already dims the editor
 
             try {
                 const response = await fetch(apiUrl(`/api/pages/${filename}`));
                 const content = await response.text();
 
-                // Update editor with actual content and fade in
+                // Update editor with actual content
+                // This WILL trigger 'input' event, so we need to handle it
+                const oldUnsavedState = state.unsavedChanges;
                 editor.value = content;
+
+                // Immediately reset unsaved state (before auto-save can trigger)
                 state.currentPage = filename;
                 state.unsavedChanges = false;
+                clearTimeout(state.saveTimeout); // Cancel any auto-save from setValue
 
                 // Remove loading class to fade in
                 editor.classList.remove('loading');
-                updateStatus(`${filename} loaded`, 'saved');
+                updateStatus('Ready', 'saved');
 
                 // Update preview if it's visible
                 if (state.previewVisible) {
@@ -1237,7 +1248,7 @@
                     editor.focus();
                 }
             } catch (error) {
-                editor.value = '// Error loading page from Drive';
+                // DON'T set placeholder on error either
                 editor.classList.remove('loading');
                 updateStatus('Error loading page', 'error');
                 showToast('Failed to load page', true);
@@ -1384,11 +1395,14 @@
 
                             // If deleted page was the current one, smoothly clear editor
                             if (state.currentPage === filename) {
+                                // Cancel any pending save first
+                                clearTimeout(state.saveTimeout);
+                                state.currentPage = null; // Set to null BEFORE clearing editor
+                                state.unsavedChanges = false;
+
                                 editor.classList.add('loading');
                                 setTimeout(() => {
-                                    state.currentPage = null;
                                     editor.value = '';
-                                    state.unsavedChanges = false;
                                     editor.classList.remove('loading');
                                 }, 100);
                             }
