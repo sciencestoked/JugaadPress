@@ -1424,18 +1424,121 @@
             );
         }
 
+        // ===== SMART PAGE NUMBERING =====
+        function detectNumberingPattern(pages) {
+            if (pages.length === 0) {
+                return { format: 'int', separator: '_', padding: 2, nextNumber: 1 };
+            }
+
+            // Patterns to detect:
+            // Integer: 0, 1, 2 or 00, 01, 02
+            // Float with dot: 1.1, 1.2, 2.1
+            // Float with dash: 1-1, 1-2, 2-1
+            // Separator: "_" or " "
+
+            const patterns = pages.map(page => {
+                // Try to extract number pattern from start of filename
+                // Match: optional leading zeros + number + (. or -) + optional decimals + (_ or space)
+                const match = page.match(/^(0*)(\d+)([.\-](\d+))?([_ ])/);
+
+                if (!match) return null;
+
+                return {
+                    leadingZeros: match[1].length,
+                    integer: parseInt(match[2]),
+                    hasDecimal: !!match[3],
+                    decimalSeparator: match[3] ? match[3][0] : null,
+                    decimal: match[4] ? parseInt(match[4]) : null,
+                    separator: match[5],
+                    raw: match[0]
+                };
+            }).filter(p => p !== null);
+
+            if (patterns.length === 0) {
+                return { format: 'int', separator: '_', padding: 2, nextNumber: 1 };
+            }
+
+            // Detect mode (most common pattern)
+            const separatorCounts = patterns.reduce((acc, p) => {
+                acc[p.separator] = (acc[p.separator] || 0) + 1;
+                return acc;
+            }, {});
+            const modeSeparator = Object.keys(separatorCounts).reduce((a, b) =>
+                separatorCounts[a] > separatorCounts[b] ? a : b
+            );
+
+            const hasDecimals = patterns.filter(p => p.hasDecimal).length;
+            const isDecimalFormat = hasDecimals > patterns.length / 2;
+
+            // Detect decimal separator mode if using decimals
+            let decimalSeparator = '.';
+            if (isDecimalFormat) {
+                const decimalSepCounts = patterns
+                    .filter(p => p.decimalSeparator)
+                    .reduce((acc, p) => {
+                        acc[p.decimalSeparator] = (acc[p.decimalSeparator] || 0) + 1;
+                        return acc;
+                    }, {});
+                if (Object.keys(decimalSepCounts).length > 0) {
+                    decimalSeparator = Object.keys(decimalSepCounts).reduce((a, b) =>
+                        decimalSepCounts[a] > decimalSepCounts[b] ? a : b
+                    );
+                }
+            }
+
+            // Detect padding (most common leading zeros + digit count)
+            const paddingCounts = patterns.reduce((acc, p) => {
+                const padding = p.leadingZeros + p.integer.toString().length;
+                acc[padding] = (acc[padding] || 0) + 1;
+                return acc;
+            }, {});
+            const modePadding = parseInt(Object.keys(paddingCounts).reduce((a, b) =>
+                paddingCounts[a] > paddingCounts[b] ? a : b
+            ));
+
+            // Calculate next number
+            let nextNumber;
+            if (isDecimalFormat) {
+                // Group by integer part
+                const groups = patterns.reduce((acc, p) => {
+                    if (!acc[p.integer]) acc[p.integer] = [];
+                    if (p.decimal !== null) acc[p.integer].push(p.decimal);
+                    return acc;
+                }, {});
+
+                const integers = Object.keys(groups).map(k => parseInt(k)).sort((a, b) => a - b);
+                const lastInteger = integers[integers.length - 1];
+                const lastGroup = groups[lastInteger];
+
+                if (lastGroup.length > 0) {
+                    const maxDecimal = Math.max(...lastGroup);
+                    nextNumber = `${lastInteger}${decimalSeparator}${maxDecimal + 1}`;
+                } else {
+                    nextNumber = `${lastInteger + 1}${decimalSeparator}1`;
+                }
+            } else {
+                // Simple integer increment
+                const numbers = patterns.map(p => p.integer);
+                const maxNum = Math.max(...numbers);
+                nextNumber = String(maxNum + 1).padStart(modePadding, '0');
+            }
+
+            return {
+                format: isDecimalFormat ? 'decimal' : 'int',
+                separator: modeSeparator,
+                padding: modePadding,
+                decimalSeparator: decimalSeparator,
+                nextNumber: nextNumber
+            };
+        }
+
         // ===== NEW PAGE BUTTON =====
         document.getElementById('btn-new-page').addEventListener('click', () => {
-            // Calculate next page number
-            const pageNumbers = state.allPages
-                .map(page => {
-                    const match = page.match(/^(\d+)_/);
-                    return match ? parseInt(match[1]) : 0;
-                })
-                .filter(num => num > 0);
+            // Detect pattern from existing pages
+            const pattern = detectNumberingPattern(state.allPages);
 
-            const nextNum = pageNumbers.length > 0 ? Math.max(...pageNumbers) + 1 : 1;
-            const suggestedName = `${String(nextNum).padStart(2, '0')}_`;
+            // Build suggested name based on detected pattern
+            const suggestedName = `${pattern.nextNumber}${pattern.separator}`;
 
             showInputModal(
                 'Create New Page',
@@ -1444,7 +1547,7 @@
                 createNewPage
             );
 
-            // Pre-fill with page number
+            // Pre-fill with smart suggestion
             const input = document.getElementById('input-modal-input');
             input.value = suggestedName;
             // Position cursor after the number prefix
